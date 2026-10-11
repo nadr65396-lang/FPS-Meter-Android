@@ -74,6 +74,8 @@
     <string name="gpu_temp">GPU 温度</string>
     <string name="soc_temp">SoC 温度</string>
     <string name="battery_level">电池电量</string>
+    <string name="remaining_ram">剩余运存</string>
+    <string name="remaining_ram_desc">在悬浮窗第三行显示可用内存及已占用百分比</string>
     <string name="position_presets">位置预设</string>
     <string name="pos_top_left">左上</string>
     <string name="pos_top_center">顶部居中</string>
@@ -153,6 +155,14 @@
     <string name="diag_section_shizuku">Shizuku 特权原始数据</string>
     <string name="diag_section_permissions">权限与服务状态</string>
     <string name="diag_shizuku_not_connected">Shizuku 未运行或未授权。启动 Shizuku 可查看更深层的硬件传感器数据。</string>
+    <string name="diag_thermal_dump_title">内核温度分区转储</string>
+    <string name="diag_thermal_dump_desc">将 Linux sysfs 温度分区及实时温度导出为文本文件以供硬件诊断。</string>
+    <string name="diag_save_dump_txt">保存 .txt</string>
+    <string name="diag_share_dump_txt">分享 .txt</string>
+    <string name="diag_copy_dump">复制转储</string>
+    <string name="diag_dump_saved_toast">温度分区数据已保存</string>
+    <string name="diag_dump_copied_toast">温度分区数据已复制到剪贴板</string>
+    <string name="diag_dump_failed_toast">导出温度数据失败：%s</string>
 
     <!-- Games screen -->
     <string name="accessibility_required">需要无障碍服务</string>

@@ -102,32 +102,61 @@ class SocThermalMonitor(
         return (temp * 10f).roundToInt() / 10f
     }
 
+    private fun maxOfNotNull(a: Float?, b: Float?): Float? {
+        return when {
+            a != null && b != null -> maxOf(a, b)
+            a != null -> a
+            b != null -> b
+            else -> null
+        }
+    }
+
+    internal fun combineSnapshots(hal: ThermalSnapshot?, sysfs: ThermalSnapshot?): ThermalSnapshot? {
+        if (hal == null) return sysfs
+        if (sysfs == null) return hal
+
+        val combinedCpu = hal.cpu ?: sysfs.cpu
+        val combinedGpu = hal.gpu ?: sysfs.gpu
+        val rawSoc = maxOfNotNull(hal.soc, sysfs.soc)
+        val combinedSoc = maxOfNotNull(rawSoc, maxOfNotNull(combinedCpu, combinedGpu))
+
+        if (combinedSoc == null && combinedCpu == null && combinedGpu == null) return null
+        return ThermalSnapshot(
+            soc = combinedSoc,
+            cpu = combinedCpu,
+            gpu = combinedGpu
+        )
+    }
+
     /**
      * Attempts to read SoC / CPU / GPU temperatures first via dumpsys thermalservice,
-     * falling back to /sys/class/thermal/thermal_zone* if necessary.
+     * falling back or supplementing via /sys/class/thermal/thermal_zone* if necessary.
      */
-    private fun readThermalSnapshot(): ThermalSnapshot? {
+    internal fun readThermalSnapshot(): ThermalSnapshot? {
         // Strategy 1: dumpsys thermalservice (Android 10+ standard Thermal HAL)
         val dumpsysOutput = runShellCommand("dumpsys thermalservice")
-        if (dumpsysOutput.isNotEmpty()) {
-            val parsedFromHal = parseThermalServiceSnapshot(dumpsysOutput)
-            if (parsedFromHal != null) {
-                return parsedFromHal
-            }
+        val parsedFromHal = if (dumpsysOutput.isNotEmpty()) {
+            parseThermalServiceSnapshot(dumpsysOutput)
+        } else {
+            null
         }
 
-        // Strategy 2: Fallback query Linux sysfs thermal zones
+        // If HAL provided both CPU and GPU, return immediately without extra shell execution
+        if (parsedFromHal != null && parsedFromHal.cpu != null && parsedFromHal.gpu != null) {
+            return parsedFromHal
+        }
+
+        // Strategy 2: Fallback / supplemental query via Linux sysfs thermal zones
         val sysfsOutput = runShellCommand(
             "for f in /sys/class/thermal/thermal_zone*; do echo \"$(cat \$f/type 2>/dev/null):$(cat \$f/temp 2>/dev/null)\"; done"
         )
-        if (sysfsOutput.isNotEmpty()) {
-            val parsedFromSysfs = parseSysfsThermalSnapshot(sysfsOutput)
-            if (parsedFromSysfs != null) {
-                return parsedFromSysfs
-            }
+        val parsedFromSysfs = if (sysfsOutput.isNotEmpty()) {
+            parseSysfsThermalSnapshot(sysfsOutput)
+        } else {
+            null
         }
 
-        return null
+        return combineSnapshots(parsedFromHal, parsedFromSysfs)
     }
 
     internal fun parseThermalServiceSnapshot(output: String): ThermalSnapshot? {
@@ -266,12 +295,13 @@ class SocThermalMonitor(
                 type.contains("tsens") || type.contains("mtktscpu") || type.contains("mtktsap") ||
                 type.contains("cluster") || type.contains("cpuss") || type.contains("gpuss") ||
                 type.contains("exynos") || type.contains("kryo") || type.contains("cortex") ||
-                type.contains("gpu")
+                type.contains("gpu") || type.contains("g3d") || type.contains("mali") ||
+                type.contains("kgsl")
     }
 
     internal fun isUnifiedSocSensor(name: String, type: Int): Boolean {
         if (type == TYPE_SOC || type == TYPE_SOC_AIDL) return true
-        return name.contains("soc_thermal") || name.contains("soc-thermal") || name.contains("soc_max") ||
+        return name == "ap" || name.contains("soc_thermal") || name.contains("soc-thermal") || name.contains("soc_max") ||
                 name.contains("ap-thermal") || name.contains("ap_thermal") ||
                 name.contains("mtktsap") || name.contains("cpuss-") || name.contains("tsens_tz_sensor")
     }
@@ -283,7 +313,8 @@ class SocThermalMonitor(
     }
 
     internal fun isGpuSensor(name: String): Boolean {
-        return (name.contains("gpu") || name.contains("gpuss")) && !name.contains("step")
+        return (name.contains("gpu") || name.contains("gpuss") || name.contains("g3d") ||
+                name.contains("mali") || name.contains("kgsl")) && !name.contains("step")
     }
 
     internal fun normalizeSysfsTemp(raw: Float, type: String = ""): Float? {
@@ -292,7 +323,9 @@ class SocThermalMonitor(
             raw > 1000f -> raw / 10f         // Deci-degrees (e.g. 420 -> 42.0°C)
             raw in 20f..115f -> {
                 // Direct Celsius only valid for explicit thermal/CPU/temp sensors, not raw percentages
-                if (type.contains("cpu") || type.contains("thermal") || type.contains("temp") || type.contains("tsens")) {
+                if (type.contains("cpu") || type.contains("thermal") || type.contains("temp") ||
+                    type.contains("tsens") || type.contains("gpu") || type.contains("gpuss") ||
+                    type.contains("g3d") || type.contains("mali") || type.contains("kgsl")) {
                     raw
                 } else {
                     null

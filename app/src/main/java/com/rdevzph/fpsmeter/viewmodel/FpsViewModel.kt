@@ -49,7 +49,8 @@ data class OverlaySettings(
     val autoRecordAll: Boolean = false,
     val fpsProvider: FpsProvider = FpsProvider.CHOREOGRAPHER,
     val showGraphicsApi: Boolean = true,
-    val showBatteryLevel: Boolean = false
+    val showBatteryLevel: Boolean = false,
+    val showRam: Boolean = false
 ) {
     companion object {
         const val AUTO_COLOR = 0 // Sentinel value for automatic coloring
@@ -75,6 +76,7 @@ data class OverlaySettings(
         private const val KEY_FPS_PROVIDER = "fps_provider"
         private const val KEY_SHOW_GRAPHICS_API = "show_graphics_api"
         private const val KEY_SHOW_BATTERY_LEVEL = "show_battery_level"
+        private const val KEY_SHOW_RAM = "show_ram"
 
         fun load(context: Context): OverlaySettings {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -99,7 +101,8 @@ data class OverlaySettings(
                 autoRecordAll = prefs.getBoolean(KEY_AUTO_RECORD_ALL, defaultSettings.autoRecordAll),
                 fpsProvider = FpsProvider.fromString(prefs.getString(KEY_FPS_PROVIDER, defaultSettings.fpsProvider.name)),
                 showGraphicsApi = prefs.getBoolean(KEY_SHOW_GRAPHICS_API, defaultSettings.showGraphicsApi),
-                showBatteryLevel = prefs.getBoolean(KEY_SHOW_BATTERY_LEVEL, defaultSettings.showBatteryLevel)
+                showBatteryLevel = prefs.getBoolean(KEY_SHOW_BATTERY_LEVEL, defaultSettings.showBatteryLevel),
+                showRam = prefs.getBoolean(KEY_SHOW_RAM, defaultSettings.showRam)
             )
         }
 
@@ -125,6 +128,7 @@ data class OverlaySettings(
                 putString(KEY_FPS_PROVIDER, settings.fpsProvider.name)
                 putBoolean(KEY_SHOW_GRAPHICS_API, settings.showGraphicsApi)
                 putBoolean(KEY_SHOW_BATTERY_LEVEL, settings.showBatteryLevel)
+                putBoolean(KEY_SHOW_RAM, settings.showRam)
                 apply()
             }
         }

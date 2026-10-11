@@ -1,5 +1,6 @@
 package com.rdevzph.fpsmeter.overlay
 
+import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -39,6 +40,7 @@ import kotlinx.coroutines.*
 import rikka.shizuku.Shizuku
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.util.Locale
 import kotlin.math.roundToInt
 
 /**
@@ -72,6 +74,7 @@ class FpsOverlayService : Service() {
         const val EXTRA_FPS_PROVIDER = "fps_provider"
         const val EXTRA_SHOW_API = "show_api"
         const val EXTRA_SHOW_BATTERY_LEVEL = "show_battery_level"
+        const val EXTRA_SHOW_RAM = "show_ram"
 
         var isRunning = false
         var isAutoStarted = false
@@ -119,6 +122,11 @@ class FpsOverlayService : Service() {
     private var fpsProvider = FpsProvider.CHOREOGRAPHER
     private var showGraphicsApi = true
     private var showBatteryLevel = false
+    private var showRam = false
+
+    private var availableRamGb: Float = 0f
+    private var usedRamPercent: Int = 0
+    private var ramMonitorJob: Job? = null
 
     private var batteryTemp: Float = 0f
     private var batteryLevel: Int = -1
@@ -233,7 +241,14 @@ class FpsOverlayService : Service() {
         fpsProvider = saved.fpsProvider
         showGraphicsApi = saved.showGraphicsApi
         showBatteryLevel = saved.showBatteryLevel
+        showRam = saved.showRam
 
+        if (showRam) {
+            val (ramGb, ramPercent) = sampleRamUsage()
+            availableRamGb = ramGb
+            usedRamPercent = ramPercent
+        }
+        updateRamMonitoring()
         updateSocThermalMonitoring()
 
         FpsTileService.updateTile(this)
@@ -446,6 +461,18 @@ class FpsOverlayService : Service() {
         if (intent.hasExtra(EXTRA_SHOW_BATTERY_LEVEL)) {
             showBatteryLevel = intent.getBooleanExtra(EXTRA_SHOW_BATTERY_LEVEL, showBatteryLevel)
         }
+        if (intent.hasExtra(EXTRA_SHOW_RAM)) {
+            val newShowRam = intent.getBooleanExtra(EXTRA_SHOW_RAM, showRam)
+            if (newShowRam != showRam) {
+                showRam = newShowRam
+                if (showRam && availableRamGb == 0f) {
+                    val (ramGb, ramPercent) = sampleRamUsage()
+                    availableRamGb = ramGb
+                    usedRamPercent = ramPercent
+                }
+                updateRamMonitoring()
+            }
+        }
     }
 
     private fun createOverlayBackgroundDrawable(isMultiLine: Boolean): GradientDrawable {
@@ -535,6 +562,7 @@ class FpsOverlayService : Service() {
         val hasBatt = showTemp
         val hasBattLevel = showBatteryLevel
         val hasBattBoth = hasBatt && hasBattLevel
+        val hasRam = showRam
 
         val extraOverlayCount = (if (hasApi) 1 else 0) +
                 (if (hasMs) 1 else 0) +
@@ -544,8 +572,9 @@ class FpsOverlayService : Service() {
                 (if (hasBattBoth) 1 else ((if (hasBatt) 1 else 0) + (if (hasBattLevel) 1 else 0)))
 
         val hasThermals = hasCpu || hasGpu || hasSoc || hasBatt || hasBattLevel
-        // Only wrap to next line if more than 3 extra overlays are enabled (> 3); stay horizontal for 1-3 overlays
-        val useNextLine = extraOverlayCount > 3 && hasThermals
+        // Wrap thermals to next line if more than 3 extra overlays are enabled (> 3) OR if RAM overlay is also enabled and thermals are present
+        val useNextLine = (extraOverlayCount > 3 && hasThermals) || (hasRam && hasThermals)
+        val isMultiLine = useNextLine || hasRam
 
         val ssb = SpannableStringBuilder()
 
@@ -610,11 +639,23 @@ class FpsOverlayService : Service() {
             }
         }
 
+        // === Memory Group (RAM) ===
+        if (hasRam) {
+            ssb.append("\n")
+            ssb.append("RAM ", labelColor, StyleSpan(Typeface.BOLD))
+            val ramDisplay = if (availableRamGb > 0f) {
+                String.format(Locale.US, "%.1f GB (%d%%)", availableRamGb, usedRamPercent)
+            } else {
+                "-- GB (--%)"
+            }
+            ssb.append(ramDisplay, valueColor, StyleSpan(Typeface.BOLD))
+        }
+
         overlayView.post {
-            if (lastUseNextLine != useNextLine) {
-                lastUseNextLine = useNextLine
-                overlayView.background = createOverlayBackgroundDrawable(useNextLine)
-                if (useNextLine) {
+            if (lastUseNextLine != isMultiLine) {
+                lastUseNextLine = isMultiLine
+                overlayView.background = createOverlayBackgroundDrawable(isMultiLine)
+                if (isMultiLine) {
                     overlayView.setPadding(28, 12, 28, 12)
                 } else {
                     overlayView.setPadding(24, 8, 24, 8)
@@ -843,6 +884,52 @@ class FpsOverlayService : Service() {
         }
     }
 
+    private fun sampleRamUsage(): Pair<Float, Int> {
+        return try {
+            val actManager = getSystemService(ACTIVITY_SERVICE) as? ActivityManager
+            val memInfo = ActivityManager.MemoryInfo()
+            actManager?.getMemoryInfo(memInfo)
+            val availGb = memInfo.availMem.toFloat() / (1024f * 1024f * 1024f)
+            val usedPercent = if (memInfo.totalMem > 0L) {
+                val usedBytes = (memInfo.totalMem - memInfo.availMem).coerceAtLeast(0L)
+                ((usedBytes.toDouble() / memInfo.totalMem.toDouble()) * 100.0).roundToInt().coerceIn(0, 100)
+            } else {
+                0
+            }
+            Pair(availGb, usedPercent)
+        } catch (e: Exception) {
+            Pair(0f, 0)
+        }
+    }
+
+    private fun updateRamMonitoring() {
+        if (showRam) {
+            if (ramMonitorJob == null || ramMonitorJob?.isActive != true) {
+                ramMonitorJob = serviceScope.launch(Dispatchers.IO) {
+                    while (isActive) {
+                        val (ramGb, ramPercent) = sampleRamUsage()
+                        withContext(Dispatchers.Main) {
+                            availableRamGb = ramGb
+                            usedRamPercent = ramPercent
+                            if (isOverlayVisible) {
+                                updateOverlayText()
+                            }
+                        }
+                        delay(2000L)
+                    }
+                }
+            }
+        } else {
+            ramMonitorJob?.cancel()
+            ramMonitorJob = null
+            availableRamGb = 0f
+            usedRamPercent = 0
+            if (isOverlayVisible) {
+                updateOverlayText()
+            }
+        }
+    }
+
     private fun buildNotification(): Notification {
         val tapIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
         val stopIntent = PendingIntent.getService(this, 1, Intent(this, FpsOverlayService::class.java).apply { action = ACTION_STOP }, PendingIntent.FLAG_IMMUTABLE)
@@ -907,6 +994,8 @@ class FpsOverlayService : Service() {
         stopSurfaceFlingerMeasuring()
         socThermalMonitor?.stop()
         socThermalMonitor = null
+        ramMonitorJob?.cancel()
+        ramMonitorJob = null
         FpsRecordingManager.endCurrentSession(this)
         unregisterReceiver(batteryReceiver)
         if (::overlayView.isInitialized) {

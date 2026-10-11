@@ -16,6 +16,9 @@ import android.view.Display
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -49,6 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import kotlin.math.roundToInt
 
@@ -119,6 +123,53 @@ fun DeviceDiagnosticsScreen(
             isLoading = true
             diagnosticData = fetchDiagnostics(context)
             isLoading = false
+        }
+    }
+
+    val saveDumpLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    val dump = generateThermalZoneDump(diagnosticData)
+                    context.contentResolver.openOutputStream(uri)?.use { os ->
+                        os.write(dump.toByteArray(Charsets.UTF_8))
+                    }
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, context.getString(R.string.diag_dump_saved_toast), Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, context.getString(R.string.diag_dump_failed_toast, e.message ?: ""), Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    fun triggerSaveDump() {
+        val cleanModel = diagnosticData.deviceModel.replace("[^a-zA-Z0-9_-]".toRegex(), "_")
+        saveDumpLauncher.launch("thermal_zones_${cleanModel}.txt")
+    }
+
+    fun triggerShareDump() {
+        coroutineScope.launch(Dispatchers.IO) {
+            val dump = generateThermalZoneDump(diagnosticData)
+            withContext(Dispatchers.Main) {
+                shareThermalDumpFile(context, diagnosticData, dump)
+            }
+        }
+    }
+
+    fun copyDumpToClipboard() {
+        coroutineScope.launch(Dispatchers.IO) {
+            val dump = generateThermalZoneDump(diagnosticData)
+            withContext(Dispatchers.Main) {
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                clipboard?.setPrimaryClip(ClipData.newPlainText("Thermal Zones Dump", dump))
+                Toast.makeText(context, context.getString(R.string.diag_dump_copied_toast), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -380,29 +431,105 @@ fun DeviceDiagnosticsScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        } else if (diagnosticData.rawHalThermals.isNotEmpty()) {
-                            Spacer(Modifier.height(10.dp))
+                        } else {
+                            if (diagnosticData.rawHalThermals.isNotEmpty()) {
+                                Spacer(Modifier.height(10.dp))
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                                Spacer(Modifier.height(10.dp))
+                                Text(
+                                    "Raw Thermal HAL Readings:",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(Modifier.height(6.dp))
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+                                        .padding(8.dp)
+                                ) {
+                                    diagnosticData.rawHalThermals.forEach { reading ->
+                                        Text(
+                                            reading,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontFamily = FontFamily.Monospace,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(Modifier.height(12.dp))
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                            Spacer(Modifier.height(10.dp))
+                            Spacer(Modifier.height(12.dp))
                             Text(
-                                "Raw Thermal HAL Readings:",
+                                stringResource(R.string.diag_thermal_dump_title),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(Modifier.height(6.dp))
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                                    .padding(8.dp)
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                stringResource(R.string.diag_thermal_dump_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                diagnosticData.rawHalThermals.forEach { reading ->
+                                Button(
+                                    onClick = { triggerSaveDump() },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.SaveAlt,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
                                     Text(
-                                        reading,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontFamily = FontFamily.Monospace,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        stringResource(R.string.diag_save_dump_txt),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+                                OutlinedButton(
+                                    onClick = { triggerShareDump() },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Share,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        stringResource(R.string.diag_share_dump_txt),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = { copyDumpToClipboard() },
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(MaterialTheme.colorScheme.surface)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ContentCopy,
+                                        contentDescription = stringResource(R.string.diag_copy_dump),
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -639,13 +766,29 @@ private suspend fun fetchDiagnostics(context: Context): DeviceDiagnosticData = w
                     rawHalThermals.add(line.trim())
                 }
             }
-            val monitor = SocThermalMonitor({}, {})
-            val snapshot = monitor.parseThermalServiceSnapshot(thermalOutput)
-            if (snapshot != null) {
-                snapshot.cpu?.let { shizukuCpuTemp = "${it}°C" }
-                snapshot.gpu?.let { shizukuGpuTemp = "${it}°C" }
-                snapshot.soc?.let { shizukuSocTemp = "${it}°C" }
+        }
+
+        val monitor = SocThermalMonitor({}, {})
+        var snapshot = if (thermalOutput.isNotEmpty()) {
+            monitor.parseThermalServiceSnapshot(thermalOutput)
+        } else {
+            null
+        }
+
+        if (snapshot == null || snapshot.gpu == null || snapshot.cpu == null) {
+            val sysfsOutput = runShizukuShell(
+                "for f in /sys/class/thermal/thermal_zone*; do echo \"$(cat \$f/type 2>/dev/null):$(cat \$f/temp 2>/dev/null)\"; done"
+            )
+            if (sysfsOutput.isNotEmpty()) {
+                val sysfsSnapshot = monitor.parseSysfsThermalSnapshot(sysfsOutput)
+                snapshot = monitor.combineSnapshots(snapshot, sysfsSnapshot)
             }
+        }
+
+        if (snapshot != null) {
+            snapshot.cpu?.let { shizukuCpuTemp = "${it}°C" }
+            snapshot.gpu?.let { shizukuGpuTemp = "${it}°C" }
+            snapshot.soc?.let { shizukuSocTemp = "${it}°C" }
         }
     }
 
@@ -808,4 +951,69 @@ private fun shareViaIntent(context: Context, d: DeviceDiagnosticData, report: St
         putExtra(Intent.EXTRA_TEXT, report)
     }
     context.startActivity(Intent.createChooser(intent, context.getString(R.string.diag_share)))
+}
+
+internal fun generateThermalZoneDump(
+    d: DeviceDiagnosticData,
+    shellRunner: (String) -> String = ::runShizukuShell
+): String {
+    val sb = StringBuilder()
+    sb.appendLine("# Device: ${d.manufacturer} ${d.deviceModel} (${d.deviceCode})")
+    sb.appendLine("# Android: ${d.androidVersion} (API ${d.sdkInt})")
+    if (d.socModelShizuku.isNotEmpty()) {
+        sb.appendLine("# SoC Model: ${d.socModelShizuku}")
+    }
+    if (d.socPlatformShizuku.isNotEmpty()) {
+        sb.appendLine("# Platform: ${d.socPlatformShizuku}")
+    }
+    val shellId = shellRunner("id 2>&1").lines().firstOrNull()?.trim() ?: ""
+    if (shellId.isNotEmpty()) {
+        sb.appendLine("# Shell Identity: $shellId")
+    }
+    sb.appendLine("# Generated by FPS Meter Device Diagnostics")
+    sb.appendLine()
+    sb.appendLine("$ dumpsys thermalservice")
+    val halOutput = shellRunner("dumpsys thermalservice 2>&1")
+    sb.appendLine(halOutput.ifEmpty { "(No output or permission denied)" })
+    sb.appendLine()
+    sb.appendLine("$ cat /sys/class/thermal/thermal_zone*/temp")
+    val tempsOutput = shellRunner("cat /sys/class/thermal/thermal_zone*/temp 2>&1")
+    sb.appendLine(tempsOutput.ifEmpty { "(No output or permission denied)" })
+    sb.appendLine()
+    sb.appendLine("$ for d in /sys/class/thermal/thermal_zone*; do")
+    sb.appendLine("  echo \"\$(cat \$d/type): \$(cat \$d/temp)\"")
+    sb.appendLine("done")
+    val zonesOutput = shellRunner(
+        "for d in /sys/class/thermal/thermal_zone*; do echo \"$(cat \$d/type 2>&1): $(cat \$d/temp 2>&1)\"; done"
+    )
+    sb.appendLine(zonesOutput.ifEmpty { "(No output or permission denied)" })
+    return sb.toString().trim()
+}
+
+private fun shareThermalDumpFile(context: Context, d: DeviceDiagnosticData, dumpContent: String) {
+    try {
+        val dir = File(context.cacheDir, "shared_diagnostics").apply { mkdirs() }
+        val cleanModel = d.deviceModel.replace("[^a-zA-Z0-9_-]".toRegex(), "_")
+        val dumpFile = File(dir, "thermal_zones_${cleanModel}.txt")
+        dumpFile.writeText(dumpContent, Charsets.UTF_8)
+
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            dumpFile
+        )
+
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_SUBJECT, "[Thermal Zones Dump] ${d.manufacturer} ${d.deviceModel}")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        val chooser = Intent.createChooser(shareIntent, context.getString(R.string.diag_share_dump_txt)).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(chooser)
+    } catch (e: Exception) {
+        Toast.makeText(context, context.getString(R.string.diag_dump_failed_toast, e.message ?: ""), Toast.LENGTH_SHORT).show()
+    }
 }

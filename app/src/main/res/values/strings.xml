@@ -74,6 +74,8 @@
     <string name="gpu_temp">GPU Temp</string>
     <string name="soc_temp">SoC Temp</string>
     <string name="battery_level">Battery Level</string>
+    <string name="remaining_ram">Remaining RAM</string>
+    <string name="remaining_ram_desc">Display available memory and occupied RAM percentage on a third overlay line</string>
     <string name="position_presets">Position Presets</string>
     <string name="pos_top_left">Top Left</string>
     <string name="pos_top_center">Top Center</string>
@@ -153,6 +155,14 @@
     <string name="diag_section_shizuku">Shizuku &amp; Privileged Raw Data</string>
     <string name="diag_section_permissions">Permissions &amp; Services</string>
     <string name="diag_shizuku_not_connected">Shizuku is not running or permission is not granted. Start Shizuku to view elevated hardware sensors.</string>
+    <string name="diag_thermal_dump_title">Kernel Thermal Zones Dump</string>
+    <string name="diag_thermal_dump_desc">Dump Linux sysfs thermal zones and temperatures to a text file for hardware diagnostics.</string>
+    <string name="diag_save_dump_txt">Save .txt</string>
+    <string name="diag_share_dump_txt">Share .txt</string>
+    <string name="diag_copy_dump">Copy Dump</string>
+    <string name="diag_dump_saved_toast">Thermal zone dump saved</string>
+    <string name="diag_dump_copied_toast">Thermal zone dump copied to clipboard</string>
+    <string name="diag_dump_failed_toast">Failed to save thermal dump: %s</string>
 
     <!-- Games screen -->
     <string name="accessibility_required">Accessibility Service Required</string>

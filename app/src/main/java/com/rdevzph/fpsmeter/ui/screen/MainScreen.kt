@@ -195,6 +195,7 @@ fun MainScreen(
                 putExtra(FpsOverlayService.EXTRA_FPS_PROVIDER, settings.fpsProvider.name)
                 putExtra(FpsOverlayService.EXTRA_SHOW_API, settings.showGraphicsApi)
                 putExtra(FpsOverlayService.EXTRA_SHOW_BATTERY_LEVEL, settings.showBatteryLevel)
+                putExtra(FpsOverlayService.EXTRA_SHOW_RAM, settings.showRam)
             }
             context.startForegroundService(intent)
             viewModel.setOverlayRunning(true)
@@ -376,6 +377,7 @@ fun MainScreen(
                             putExtra(FpsOverlayService.EXTRA_FPS_PROVIDER, settings.fpsProvider.name)
                             putExtra(FpsOverlayService.EXTRA_SHOW_API, settings.showGraphicsApi)
                             putExtra(FpsOverlayService.EXTRA_SHOW_BATTERY_LEVEL, settings.showBatteryLevel)
+                            putExtra(FpsOverlayService.EXTRA_SHOW_RAM, settings.showRam)
                         }
                         context.startForegroundService(intent)
                         viewModel.setOverlayRunning(true)
@@ -404,6 +406,7 @@ fun MainScreen(
                                 putExtra(FpsOverlayService.EXTRA_FPS_PROVIDER, newSettings.fpsProvider.name)
                                 putExtra(FpsOverlayService.EXTRA_SHOW_API, newSettings.showGraphicsApi)
                                 putExtra(FpsOverlayService.EXTRA_SHOW_BATTERY_LEVEL, newSettings.showBatteryLevel)
+                                putExtra(FpsOverlayService.EXTRA_SHOW_RAM, newSettings.showRam)
                             }
                             context.startForegroundService(intent)
                         }
@@ -1488,6 +1491,32 @@ fun OverlaySettingsPanel(
             }
         }
 
+        Spacer(Modifier.height(8.dp))
+
+        // Remaining RAM toggle (Third line)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
+                Text(stringResource(R.string.remaining_ram), style = MaterialTheme.typography.labelMedium)
+                Text(
+                    stringResource(R.string.remaining_ram_desc),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = settings.showRam,
+                onCheckedChange = { onChange(settings.copy(showRam = it)) },
+                modifier = Modifier.scale(0.8f)
+            )
+        }
+
         Spacer(Modifier.height(12.dp))
 
         // Position presets
@@ -1547,6 +1576,7 @@ fun OverlaySettingsPanel(
         val hasBatt = settings.showTemp
         val hasBattLevel = settings.showBatteryLevel
         val hasBattBoth = hasBatt && hasBattLevel
+        val hasRam = settings.showRam
 
         val extraOverlayCount = (if (hasApi) 1 else 0) +
                 (if (hasMs) 1 else 0) +
@@ -1556,16 +1586,17 @@ fun OverlaySettingsPanel(
                 (if (hasBattBoth) 1 else ((if (hasBatt) 1 else 0) + (if (hasBattLevel) 1 else 0)))
 
         val hasThermals = hasCpu || hasGpu || hasSoc || hasBatt || hasBattLevel
-        // Only wrap to next line if more than 3 extra overlays are enabled (> 3); stay horizontal for 1-3 overlays
-        val useNextLine = extraOverlayCount > 3 && hasThermals
+        // Only wrap to next line if more than 3 extra overlays are enabled (> 3) OR if RAM overlay is also enabled and thermals are present
+        val useNextLine = (extraOverlayCount > 3 && hasThermals) || (hasRam && hasThermals)
+        val isMultiLine = useNextLine || hasRam
 
         // FPS preview chip
         Surface(
             color = Color.DarkGray.copy(alpha = 0.8f),
-            shape = RoundedCornerShape(if (useNextLine) 12.dp else 100.dp)
+            shape = RoundedCornerShape(if (isMultiLine) 12.dp else 100.dp)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = if (useNextLine) 8.dp else 6.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = if (isMultiLine) 8.dp else 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.Visibility, null, modifier = Modifier.size(14.dp), tint = Color(0xAAFFFFFF))
@@ -1629,6 +1660,17 @@ fun OverlaySettingsPanel(
                                 appendThermal("BATT", "38.5°C")
                             } else if (hasBattLevel) {
                                 appendThermal("BAT", "85%")
+                            }
+                        }
+
+                        // === Memory Group (RAM) ===
+                        if (hasRam) {
+                            append("\n")
+                            withStyle(SpanStyle(color = labelColor, fontWeight = FontWeight.Bold)) {
+                                append("RAM ")
+                            }
+                            withStyle(SpanStyle(color = valueColor, fontWeight = FontWeight.Bold)) {
+                                append("4.2 GB (58%)")
                             }
                         }
                     },

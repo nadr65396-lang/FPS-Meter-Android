@@ -166,4 +166,63 @@ class SocThermalMonitorTest {
         org.junit.Assert.assertFalse(monitor.isExcludedZone("soc_thermal"))
         org.junit.Assert.assertFalse(monitor.isExcludedZone("mtktscpu"))
     }
+
+    @Test
+    fun testSamsungGalaxyTabS9Ultra_combinesHalApWithSysfsGpu() {
+        // Exact HAL dump reported by user in GitHub Issue #13 on Galaxy Tab S9 Ultra (Snapdragon 8 Gen 2)
+        val samsungHalOutput = """
+            Current temperatures from HAL:
+            Temperature{mValue=45.5, mType=0, mName=AP, mStatus=0}
+            Temperature{mValue=32.2, mType=2, mName=BAT, mStatus=0}
+            Temperature{mValue=35.1, mType=3, mName=SKIN, mStatus=0}
+            Temperature{mValue=33.0, mType=3, mName=PA, mStatus=0}
+            Temperature{mValue=31.0, mType=3, mName=USB, mStatus=0}
+            Current cooling devices from HAL:
+        """.trimIndent()
+
+        val halSnapshot = monitor.parseThermalServiceSnapshot(samsungHalOutput)
+        assertNotNull(halSnapshot)
+        assertEquals(45.5f, halSnapshot!!.cpu!!, 0.05f)
+        assertEquals(45.5f, halSnapshot.soc!!, 0.05f)
+        org.junit.Assert.assertNull("HAL dump alone lacks GPU sensor", halSnapshot.gpu)
+
+        // Sysfs thermal dump on Snapdragon 8 Gen 2 / kalama exposing Adreno GPU zones
+        val sysfsDump = """
+            cpu-1-5-usr: 44200
+            gpuss-0-usr: 42100
+            gpuss-1-usr: 41800
+        """.trimIndent()
+
+        val sysfsSnapshot = monitor.parseSysfsThermalSnapshot(sysfsDump)
+        assertNotNull(sysfsSnapshot)
+        assertEquals(42.1f, sysfsSnapshot!!.gpu!!, 0.05f)
+
+        // Combined snapshot should preserve CPU from HAL and supplement GPU from sysfs
+        val combined = monitor.combineSnapshots(halSnapshot, sysfsSnapshot)
+        assertNotNull(combined)
+        assertEquals(45.5f, combined!!.cpu!!, 0.05f)
+        assertEquals(42.1f, combined.gpu!!, 0.05f)
+        assertEquals(45.5f, combined.soc!!, 0.05f)
+    }
+
+    @Test
+    fun testGpuSensorDetection_and_normalization() {
+        assertTrue(monitor.isGpuSensor("gpuss-0-usr"))
+        assertTrue(monitor.isGpuSensor("gpu-thermal"))
+        assertTrue(monitor.isGpuSensor("g3d-thermal"))
+        assertTrue(monitor.isGpuSensor("mali_thermal"))
+        assertTrue(monitor.isGpuSensor("kgsl-3d0"))
+
+        org.junit.Assert.assertFalse(monitor.isGpuSensor("gpuss-max-step"))
+        org.junit.Assert.assertFalse(monitor.isGpuSensor("gpu-skin-avg-step"))
+        org.junit.Assert.assertFalse(monitor.isGpuSensor("cpu-0-0-usr"))
+
+        // Direct Celsius normalization for GPU sensor
+        val normGpu = monitor.normalizeSysfsTemp(43.5f, "gpuss-0-usr")
+        assertEquals(43.5f, normGpu!!, 0.05f)
+
+        // Millidegrees normalization for GPU sensor
+        val normMilli = monitor.normalizeSysfsTemp(43500f, "gpuss-0-usr")
+        assertEquals(43.5f, normMilli!!, 0.05f)
+    }
 }
