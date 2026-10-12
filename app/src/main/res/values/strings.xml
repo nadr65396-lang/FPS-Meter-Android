@@ -76,6 +76,8 @@
     <string name="battery_level">Battery Level</string>
     <string name="remaining_ram">Remaining RAM</string>
     <string name="remaining_ram_desc">Display available memory and occupied RAM percentage on a third overlay line</string>
+    <string name="single_line_overlay">Single-line overlay</string>
+    <string name="single_line_overlay_desc">Display all metrics on one horizontal line for tablets or landscape view</string>
     <string name="position_presets">Position Presets</string>
     <string name="pos_top_left">Top Left</string>
     <string name="pos_top_center">Top Center</string>
@@ -122,6 +124,7 @@
     <string name="section_developer">Developer</string>
     <string name="section_github">GitHub &amp; Community</string>
     <string name="github_repository">Repository</string>
+    <string name="telegram_community">Telegram Community</string>
     <string name="github_star">Star on GitHub</string>
     <string name="github_star_desc">Support the project with a star</string>
     <string name="github_report_issue">Report an Issue</string>

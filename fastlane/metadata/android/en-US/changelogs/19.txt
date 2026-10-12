@@ -1,0 +1,6 @@
+- Single-Line Overlay Mode: Toggle in Overlay settings to display all metrics on a single line for tablets and landscape mode.
+- Telegram Community Link: Added direct Telegram community link in Settings.
+- Fixed missing GPU temperature overlay on devices with combined AP Thermal HAL sensors.
+- Added a third-line overlay showing available memory and occupied RAM percentage with a settings toggle.
+- Added Kernel Thermal Zones dump export (.txt) with direct save, share, and copy in Device Diagnostics.
+- Added Linux sysfs thermal fallback and sensor merging for Adreno, Mali, and Exynos GPU hardware.

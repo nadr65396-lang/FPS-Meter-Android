@@ -4,6 +4,27 @@ All notable changes to the FPS Meter project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v2.8] - 2026-10-12
+
+### Added
+- **Single-Line Overlay Mode**: Added a toggle in Overlay settings to display all performance, thermal, and RAM metrics on a single horizontal line, designed for tablets, wide screens, and landscape gaming.
+- **Telegram Community Link**: Added direct Telegram community link in the Settings screen.
+
+### Fixed
+- **GPU Temperature Detection on Combined AP Sensors**: Verified and finalized the GPU temperature overlay fix for devices where the Android Thermal HAL reports combined Application Processor (AP) readings (such as the Samsung Galaxy Tab S9 Ultra, #13).
+
+---
+
+## [v2.8-beta] - 2026-10-11
+
+### Added
+- **Third-Line RAM Overlay**: Added real-time available memory in gigabytes alongside occupied RAM percentage on a third overlay line, with an in-app toggle and responsive preview.
+- **Kernel Thermal Zones Dump**: Added an export tool in Device Diagnostics to dump raw Linux sysfs thermal zones and temperatures to a text file (.txt) with direct save, share, and copy options.
+- **Linux Sysfs Thermal Fallback**: Added fallback sensor detection and merging for Adreno, Mali, and Exynos GPU hardware when the Android Thermal HAL lacks separate GPU nodes.
+
+### Fixed
+- **Missing GPU Temperature on Combined AP Sensors**: Initial attempt and test build for missing GPU temperature on devices with combined AP Thermal HAL sensors (#13).
+
 ---
 
 ## [v2.7] - 2026-10-07
@@ -240,6 +261,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+[v2.8]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.8
+[v2.8-beta]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.8-beta
+[v2.7]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.7
+[v2.6]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.6
+[v2.5]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.5
+[v2.4]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.4
+[v2.3]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.3
+[v2.2]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.2
+[v2.1]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.1
+[v2.0]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.0
+[v1.9]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v1.9
+[v1.8]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v1.8
+[v1.7]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v1.7
+[v1.6]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v1.6
 [v1.5]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v1.5
 [v1.4]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v1.4
 [v1.3]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v1.3

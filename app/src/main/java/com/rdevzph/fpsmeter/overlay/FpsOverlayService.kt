@@ -75,6 +75,7 @@ class FpsOverlayService : Service() {
         const val EXTRA_SHOW_API = "show_api"
         const val EXTRA_SHOW_BATTERY_LEVEL = "show_battery_level"
         const val EXTRA_SHOW_RAM = "show_ram"
+        const val EXTRA_SINGLE_LINE_OVERLAY = "single_line_overlay"
 
         var isRunning = false
         var isAutoStarted = false
@@ -123,6 +124,7 @@ class FpsOverlayService : Service() {
     private var showGraphicsApi = true
     private var showBatteryLevel = false
     private var showRam = false
+    private var singleLineOverlay = false
 
     private var availableRamGb: Float = 0f
     private var usedRamPercent: Int = 0
@@ -242,6 +244,7 @@ class FpsOverlayService : Service() {
         showGraphicsApi = saved.showGraphicsApi
         showBatteryLevel = saved.showBatteryLevel
         showRam = saved.showRam
+        singleLineOverlay = saved.singleLineOverlay
 
         if (showRam) {
             val (ramGb, ramPercent) = sampleRamUsage()
@@ -473,6 +476,15 @@ class FpsOverlayService : Service() {
                 updateRamMonitoring()
             }
         }
+        if (intent.hasExtra(EXTRA_SINGLE_LINE_OVERLAY)) {
+            val newSingleLine = intent.getBooleanExtra(EXTRA_SINGLE_LINE_OVERLAY, singleLineOverlay)
+            if (newSingleLine != singleLineOverlay) {
+                singleLineOverlay = newSingleLine
+                if (::overlayView.isInitialized) {
+                    updateOverlayAppearance()
+                }
+            }
+        }
     }
 
     private fun createOverlayBackgroundDrawable(isMultiLine: Boolean): GradientDrawable {
@@ -573,8 +585,9 @@ class FpsOverlayService : Service() {
 
         val hasThermals = hasCpu || hasGpu || hasSoc || hasBatt || hasBattLevel
         // Wrap thermals to next line if more than 3 extra overlays are enabled (> 3) OR if RAM overlay is also enabled and thermals are present
-        val useNextLine = (extraOverlayCount > 3 && hasThermals) || (hasRam && hasThermals)
-        val isMultiLine = useNextLine || hasRam
+        // If singleLineOverlay is enabled, keep all metrics on a single horizontal line.
+        val useNextLine = !singleLineOverlay && ((extraOverlayCount > 3 && hasThermals) || (hasRam && hasThermals))
+        val isMultiLine = !singleLineOverlay && (useNextLine || hasRam)
 
         val ssb = SpannableStringBuilder()
 
@@ -641,7 +654,11 @@ class FpsOverlayService : Service() {
 
         // === Memory Group (RAM) ===
         if (hasRam) {
-            ssb.append("\n")
+            if (singleLineOverlay) {
+                ssb.append("  |  ", Color.GRAY)
+            } else {
+                ssb.append("\n")
+            }
             ssb.append("RAM ", labelColor, StyleSpan(Typeface.BOLD))
             val ramDisplay = if (availableRamGb > 0f) {
                 String.format(Locale.US, "%.1f GB (%d%%)", availableRamGb, usedRamPercent)

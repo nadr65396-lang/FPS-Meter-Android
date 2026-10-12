@@ -1,8 +1,10 @@
-## Version 2.8-beta
-- Attempt to fix missing GPU temperature overlay on devices with combined AP Thermal HAL sensors.
+## Version 2.8
+- Fixed missing GPU temperature overlay on devices with combined AP Thermal HAL sensors.
 - Added Linux sysfs thermal fallback and sensor merging for Adreno, Mali, and Exynos GPU hardware.
 - Added Kernel Thermal Zones dump export (.txt) with direct save, share, and copy in Device Diagnostics.
 - Added a third-line overlay showing available memory and occupied RAM percentage with a settings toggle.
+- Added single-line overlay toggle for wide screens, tablets, and landscape gaming.
+- Added Telegram community link in Settings.
 
 ## Version 2.7
 - Added in-app changelog bottom sheet for version updates and release history.

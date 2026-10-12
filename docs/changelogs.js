@@ -1,5 +1,12 @@
 // External changelogs data source (preserves index.html cleanliness and file:// offline support)
-window.CHANGELOGS_TEXT = `## Version 2.7 | Latest Release | October 7, 2026
+window.CHANGELOGS_TEXT = `## Version 2.8 | Latest Release | October 12, 2026
+- Single-Line Overlay Mode: Added a toggle in Overlay settings to display all performance, thermal, and RAM metrics on a single horizontal line, optimized for tablets, wide screens, and landscape gaming.
+- Telegram Community Link: Added direct Telegram community link (@fpsmeterandroid) in Settings.
+- GPU Temperature Fix: Confirmed and finalized the GPU temperature overlay fix for devices with combined Application Processor (AP) sensors (such as the Samsung Galaxy Tab S9 Ultra, #13) using Linux sysfs thermal sensor fallback.
+- Third-Line RAM Overlay: Added real-time remaining memory (GB) alongside occupied RAM percentage display on a third overlay line, with an in-app toggle and responsive preview.
+- Kernel Thermal Zones Dump: Added an export tool in Device Diagnostics to dump raw Linux sysfs thermal zones and temperatures to a text file (.txt) with direct save, share, and copy options.
+
+## Version 2.7 | October 7, 2026
 - In-App Changelog Bottom Sheet: Added a Material 3 bottom sheet that automatically displays release highlights when the app opens after an update, with an expandable section for historical releases and manual access through the top overflow menu.
 - Dedicated Device Diagnostics Screen: Added a diagnostics screen showing hardware specifications, thermal readings, battery health, and raw Shizuku command output.
 - One-Tap Diagnostic Reporting: Added a button on the diagnostics screen to copy and report system information directly to GitHub issues.

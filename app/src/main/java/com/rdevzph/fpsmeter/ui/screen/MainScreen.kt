@@ -196,6 +196,7 @@ fun MainScreen(
                 putExtra(FpsOverlayService.EXTRA_SHOW_API, settings.showGraphicsApi)
                 putExtra(FpsOverlayService.EXTRA_SHOW_BATTERY_LEVEL, settings.showBatteryLevel)
                 putExtra(FpsOverlayService.EXTRA_SHOW_RAM, settings.showRam)
+                putExtra(FpsOverlayService.EXTRA_SINGLE_LINE_OVERLAY, settings.singleLineOverlay)
             }
             context.startForegroundService(intent)
             viewModel.setOverlayRunning(true)
@@ -378,6 +379,7 @@ fun MainScreen(
                             putExtra(FpsOverlayService.EXTRA_SHOW_API, settings.showGraphicsApi)
                             putExtra(FpsOverlayService.EXTRA_SHOW_BATTERY_LEVEL, settings.showBatteryLevel)
                             putExtra(FpsOverlayService.EXTRA_SHOW_RAM, settings.showRam)
+                            putExtra(FpsOverlayService.EXTRA_SINGLE_LINE_OVERLAY, settings.singleLineOverlay)
                         }
                         context.startForegroundService(intent)
                         viewModel.setOverlayRunning(true)
@@ -407,6 +409,7 @@ fun MainScreen(
                                 putExtra(FpsOverlayService.EXTRA_SHOW_API, newSettings.showGraphicsApi)
                                 putExtra(FpsOverlayService.EXTRA_SHOW_BATTERY_LEVEL, newSettings.showBatteryLevel)
                                 putExtra(FpsOverlayService.EXTRA_SHOW_RAM, newSettings.showRam)
+                                putExtra(FpsOverlayService.EXTRA_SINGLE_LINE_OVERLAY, newSettings.singleLineOverlay)
                             }
                             context.startForegroundService(intent)
                         }
@@ -1517,6 +1520,32 @@ fun OverlaySettingsPanel(
             )
         }
 
+        Spacer(Modifier.height(8.dp))
+
+        // Single-line overlay toggle
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
+                Text(stringResource(R.string.single_line_overlay), style = MaterialTheme.typography.labelMedium)
+                Text(
+                    stringResource(R.string.single_line_overlay_desc),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = settings.singleLineOverlay,
+                onCheckedChange = { onChange(settings.copy(singleLineOverlay = it)) },
+                modifier = Modifier.scale(0.8f)
+            )
+        }
+
         Spacer(Modifier.height(12.dp))
 
         // Position presets
@@ -1586,9 +1615,10 @@ fun OverlaySettingsPanel(
                 (if (hasBattBoth) 1 else ((if (hasBatt) 1 else 0) + (if (hasBattLevel) 1 else 0)))
 
         val hasThermals = hasCpu || hasGpu || hasSoc || hasBatt || hasBattLevel
-        // Only wrap to next line if more than 3 extra overlays are enabled (> 3) OR if RAM overlay is also enabled and thermals are present
-        val useNextLine = (extraOverlayCount > 3 && hasThermals) || (hasRam && hasThermals)
-        val isMultiLine = useNextLine || hasRam
+        // Wrap thermals to next line if more than 3 extra overlays are enabled (> 3) OR if RAM overlay is also enabled and thermals are present
+        // If singleLineOverlay is enabled, keep all metrics on a single horizontal line.
+        val useNextLine = !settings.singleLineOverlay && ((extraOverlayCount > 3 && hasThermals) || (hasRam && hasThermals))
+        val isMultiLine = !settings.singleLineOverlay && (useNextLine || hasRam)
 
         // FPS preview chip
         Surface(
@@ -1665,7 +1695,11 @@ fun OverlaySettingsPanel(
 
                         // === Memory Group (RAM) ===
                         if (hasRam) {
-                            append("\n")
+                            if (settings.singleLineOverlay) {
+                                withStyle(SpanStyle(color = Color.Gray)) { append("  |  ") }
+                            } else {
+                                append("\n")
+                            }
                             withStyle(SpanStyle(color = labelColor, fontWeight = FontWeight.Bold)) {
                                 append("RAM ")
                             }

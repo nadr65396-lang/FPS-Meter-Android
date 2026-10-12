@@ -36,6 +36,7 @@ import com.rdevzph.fpsmeter.util.LocaleHelper
 
 private const val REPO_URL = "https://github.com/rdevz-ph/FPS-Meter-Android"
 private const val ISSUES_URL = "https://github.com/rdevz-ph/FPS-Meter-Android/issues"
+private const val TELEGRAM_URL = "https://t.me/fpsmeterandroid"
 private const val PORTFOLIO_URL = "https://romel-portfolio.vercel.app/"
 private const val PRIVACY_POLICY_URL = "https://rdevz-ph.github.io/FPS-Meter-Android/privacy.html"
 
@@ -355,6 +356,17 @@ fun SettingsScreen(
                         title = stringResource(R.string.github_repository),
                         subtitle = "github.com/rdevz-ph/FPS-Meter-Android",
                         onClick = { openBrowser(context, REPO_URL) }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 14.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                    SettingsActionRow(
+                        iconPainter = painterResource(R.drawable.ic_telegram),
+                        iconTint = Color(0xFF24A1DE),
+                        title = stringResource(R.string.telegram_community),
+                        subtitle = "t.me/fpsmeterandroid",
+                        onClick = { openBrowser(context, TELEGRAM_URL) }
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 14.dp),

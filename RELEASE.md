@@ -1,11 +1,12 @@
-# FPS Meter Android v2.7
+# FPS Meter Android v2.8
 
-### What's New in v2.7
-- **In-App Changelog Bottom Sheet**: Added a Material 3 bottom sheet that automatically displays release highlights when the app opens after an update, with an expandable section for historical releases and manual access through the top overflow menu.
-- **Dedicated Device Diagnostics Screen**: Added a diagnostics screen showing hardware specifications, thermal readings, battery health, and raw Shizuku command output.
-- **One-Tap Diagnostic Reporting**: Added a button on the diagnostics screen to copy and report system information directly to GitHub issues.
-- **Overlay Opacity Adjustment**: Updated the overlay opacity slider to adjust only text opacity, keeping the HUD background container consistent.
-- **Official Shizuku Branding & Privacy Policy**: Added official Shizuku vector branding to the dashboard and linked the privacy policy in settings.
+### What's New in v2.8
+- **Single-Line Overlay Mode**: Added a toggle in Overlay settings to display all performance, thermal, and RAM metrics on a single horizontal line, designed for tablets, wide screens, and landscape gaming.
+- **Telegram Community Link**: Added direct Telegram community link in the Settings screen.
+- **GPU Temperature Overlay Fix**: Verified and finalized the GPU temperature overlay fix for devices where the Android Thermal HAL reports combined Application Processor (AP) readings (such as the Samsung Galaxy Tab S9 Ultra, [#13](https://github.com/rdevz-ph/FPS-Meter-Android/issues/13)).
+- **Linux Sysfs Thermal Fallback**: Added fallback sensor detection and merging for Adreno, Mali, and Exynos GPU hardware when the Android Thermal HAL lacks separate GPU nodes.
+- **Third-Line RAM Overlay**: Added real-time available memory alongside occupied RAM percentage on a third overlay line, with an in-app toggle and responsive preview.
+- **Kernel Thermal Zones Dump**: Added an export tool in Device Diagnostics to dump raw Linux sysfs thermal zones and temperatures to a text file (.txt) with direct save, share, and copy options.
 
 For the complete release history, see [CHANGELOG.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/CHANGELOG.md).
 
@@ -13,8 +14,8 @@ For the complete release history, see [CHANGELOG.md](https://github.com/rdevz-ph
 - Choice between Choreographer and SurfaceFlinger FPS measurement providers
 - Automatic Graphics API detection (Vulkan and OpenGL ES)
 - Samsung-style pill-shaped overlay with cyan labels and white values
-- Real-time FPS, frame time (MS), and multi-metric temperature monitoring (CPU, GPU, SoC, and Battery)
-- Adaptive single-line or two-line layout dynamically scaling with active metrics
+- Real-time FPS, frame time (MS), RAM usage, and multi-metric temperature monitoring (CPU, GPU, SoC, and Battery)
+- Adaptive layout dynamically scaling across lines, with a single-line mode option for tablets and landscape gaming
 - Dynamic FPS color coding (green, yellow, orange, red) based on performance thresholds
 - In-memory per-game FPS session recording with dedicated History screen
 - Interactive floating assistive bubble with in-game quick control menu
