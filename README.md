@@ -55,6 +55,9 @@
   <a href="https://awesome-shizuku.vercel.app/apps/fps-meter-android"><img src="https://awesome-shizuku.vercel.app/get-it-on-shizustore.png" alt="Get it on ShizuStore" height="65" /></a>
 </p>
 
+> [!NOTE]
+> Fun fact: this is the first FPS meter app ever published on [F-Droid](https://f-droid.org/en/packages/com.rdevzph.fpsmeter/).
+
 Visit the [Official Website & Showcase](https://rdevz-ph.github.io/FPS-Meter-Android/) to explore interactive features, test screenshots, and view full release changelogs. You can also navigate directly to the [Releases](https://github.com/rdevz-ph/FPS-Meter-Android/releases) page to download the latest APK, install via [F-Droid](https://f-droid.org/en/packages/com.rdevzph.fpsmeter/), join the [Telegram Channel](https://t.me/fpsmeterandroid) (@fpsmeterandroid) for instant release APK updates, or install and receive automated updates via [ShizuStore](https://awesome-shizuku.vercel.app/apps/fps-meter-android). For troubleshooting installation issues (Google Play Protect) or Android 13+ permission restrictions, check out the [Troubleshooting and Setup Guide](./tutorials/README.md).
 
 ## Screenshots

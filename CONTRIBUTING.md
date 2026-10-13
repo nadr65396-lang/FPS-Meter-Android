@@ -24,6 +24,14 @@ To help investigate the issue, please include your device diagnostics:
 2. Go to **Settings > Device Diagnostics**.
 3. Tap **Report on GitHub** or **Copy All**, then paste the results into your GitHub issue.
 
+#### Dump Thermal Zones Text File (Version 2.8+)
+
+If you are reporting issues with CPU, GPU, or battery temperature readings:
+1. Open **Settings > Device Diagnostics**.
+2. Find the **Kernel Thermal Zones Dump** section.
+3. Tap **Save .txt** or **Share .txt** to export the `thermal_zones_<model>.txt` file.
+4. Attach this text file to your GitHub issue (or tap **Copy Dump** to paste it).
+
 > [!NOTE]
 > FPS Meter is designed to work without root access. There are no plans to add root support, so you will still need Shizuku to use the app's features that require it, even if your device is rooted with Magisk or KernelSU.
 
@@ -33,6 +41,7 @@ When creating a new bug report, please include:
 - Expected behavior versus what actually happened.
 - Device information: device model, Android version, and ROM if applicable.
 - Device diagnostics report from Settings > Device Diagnostics.
+- Dump thermal zones text file (`thermal_zones_<model>.txt`) if reporting temperature or sensor issues (v2.8+).
 - Selected FPS provider (Choreographer or SurfaceFlinger).
 - Logcat output or crash report text if available (FPS Meter includes a built-in crash reporter with a Copy Report button).
 

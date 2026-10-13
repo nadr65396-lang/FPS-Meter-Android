@@ -609,7 +609,7 @@ html[data-theme="light"] .btn-badge {
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  margin: 1rem 0 1.25rem;
+  margin: 0.85rem 0 0.65rem;
 }
 
 .store-badges-row a img {
@@ -623,6 +623,65 @@ html[data-theme="light"] .btn-badge {
 .store-badges-row a img:hover {
   transform: translateY(-2px);
   opacity: 0.95;
+}
+
+/* Material Design 3 Alert Callout (Replicating GitHub Alert style) */
+.m3-alert {
+  --alert-accent: var(--telemetry-cyan);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.6rem 0.9rem;
+  margin: 0.65rem 0 0.75rem;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background-color: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-left: 4px solid var(--alert-accent);
+  max-width: 680px;
+}
+
+.m3-alert-note {
+  --alert-accent: var(--telemetry-cyan);
+}
+
+.m3-alert-tip {
+  --alert-accent: var(--md-sys-color-primary);
+}
+
+.m3-alert-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
+  color: var(--alert-accent);
+}
+
+.m3-alert-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.m3-alert-title {
+  line-height: 1;
+}
+
+.m3-alert-body {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-alert-body a {
+  color: var(--alert-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+}
+
+.m3-alert-body a:hover {
+  text-decoration-thickness: 2px;
 }
 
 .download-note {
