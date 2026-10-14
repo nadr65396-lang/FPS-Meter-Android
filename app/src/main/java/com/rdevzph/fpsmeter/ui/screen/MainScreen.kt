@@ -94,8 +94,17 @@ fun MainScreen(
     val statusMsg by viewModel.statusMessage.collectAsState()
 
     val accessibilityEnabled by viewModel.accessibilityEnabled.collectAsState()
+    val accessibilityMalfunctioning by viewModel.accessibilityMalfunctioning.collectAsState()
     val installedApps by viewModel.installedApps.collectAsState()
     val isLoadingApps by viewModel.isLoadingApps.collectAsState()
+
+    var dismissedMalfunctionDialog by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(accessibilityMalfunctioning) {
+        if (!accessibilityMalfunctioning) {
+            dismissedMalfunctionDialog = false
+        }
+    }
 
     val sessions by viewModel.sessions.collectAsState()
     var currentTab by rememberSaveable { mutableStateOf(MainNavTab.METER) }
@@ -576,6 +585,26 @@ fun MainScreen(
                 installedApps = installedApps,
                 isLoading = isLoadingApps,
                 accessibilityEnabled = accessibilityEnabled,
+                accessibilityMalfunctioning = accessibilityMalfunctioning,
+                shizukuGranted = shizukuGranted,
+                onEnableAccessibilityViaShizuku = {
+                    viewModel.enableAccessibilityViaShizuku(context)
+                },
+                onRestartAccessibilityViaShizuku = {
+                    viewModel.restartAccessibilityViaShizuku(context)
+                },
+                onForceStopAndReset = {
+                    viewModel.forceStopAndResetViaShizuku(context)
+                },
+                onOpenAppInfo = {
+                    val intent = Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:${context.packageName}")
+                    ).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                },
                 onOpenAccessibilitySettings = {
                     context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                 },
@@ -704,6 +733,119 @@ fun MainScreen(
 
         if (showDebugWarningDialog && !showSplash && !showChangelogSheet) {
             DebugBuildWarningDialog(onDismiss = { showDebugWarningDialog = false })
+        }
+
+        if (accessibilityMalfunctioning && !dismissedMalfunctionDialog && !showSplash && !showChangelogSheet && (currentTab == MainNavTab.GAMES || settings.autoStartEnabled)) {
+            AlertDialog(
+                onDismissRequest = {
+                    dismissedMalfunctionDialog = true
+                    viewModel.dismissAccessibilityMalfunction()
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(28.dp)
+                    )
+                },
+                title = {
+                    Text(
+                        text = stringResource(R.string.accessibility_malfunctioning_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(R.string.accessibility_malfunctioning_dialog_msg),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                confirmButton = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (shizukuGranted) {
+                            Button(
+                                onClick = {
+                                    dismissedMalfunctionDialog = true
+                                    viewModel.forceStopAndResetViaShizuku(context)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(stringResource(R.string.accessibility_force_stop_shizuku))
+                            }
+                            OutlinedButton(
+                                onClick = {
+                                    dismissedMalfunctionDialog = true
+                                    val intent = Intent(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                        Uri.parse("package:${context.packageName}")
+                                    ).apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(stringResource(R.string.accessibility_app_info))
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    dismissedMalfunctionDialog = true
+                                    val intent = Intent(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                        Uri.parse("package:${context.packageName}")
+                                    ).apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(stringResource(R.string.accessibility_app_info))
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    dismissedMalfunctionDialog = true
+                                    context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(
+                                    stringResource(R.string.open_accessibility_settings),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            TextButton(
+                                onClick = {
+                                    dismissedMalfunctionDialog = true
+                                    viewModel.dismissAccessibilityMalfunction()
+                                },
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(stringResource(R.string.common_dismiss))
+                            }
+                        }
+                    }
+                },
+                dismissButton = null
+            )
         }
     }
 }

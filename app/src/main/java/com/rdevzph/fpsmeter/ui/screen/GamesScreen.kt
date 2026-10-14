@@ -44,6 +44,12 @@ fun GamesScreen(
     installedApps: List<FpsViewModel.AppInfo>,
     isLoading: Boolean = false,
     accessibilityEnabled: Boolean,
+    accessibilityMalfunctioning: Boolean = false,
+    shizukuGranted: Boolean = false,
+    onEnableAccessibilityViaShizuku: () -> Unit = {},
+    onRestartAccessibilityViaShizuku: () -> Unit = {},
+    onForceStopAndReset: () -> Unit = {},
+    onOpenAppInfo: () -> Unit = {},
     onOpenAccessibilitySettings: () -> Unit,
     onToggleAutoStart: (Boolean) -> Unit,
     onToggleAutoRecordAll: (Boolean) -> Unit,
@@ -221,44 +227,100 @@ fun GamesScreen(
             )
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Accessibility Service status warning if disabled
+                // Accessibility Service status warning if disabled or malfunctioning
                 if (!accessibilityEnabled) {
+                    val isMalfunctioning = accessibilityMalfunctioning
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.Warning,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(10.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    stringResource(R.string.accessibility_required),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.error
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(20.dp)
                                 )
-                                Text(
-                                    stringResource(R.string.accessibility_required_desc),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Spacer(Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        stringResource(
+                                            if (isMalfunctioning) R.string.accessibility_malfunctioning_title
+                                            else R.string.accessibility_required
+                                        ),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                    Text(
+                                        stringResource(
+                                            if (isMalfunctioning) R.string.accessibility_malfunctioning_desc
+                                            else R.string.accessibility_required_desc
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
-                            Spacer(Modifier.width(8.dp))
-                            Button(
-                                onClick = onOpenAccessibilitySettings,
-                                shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                            Spacer(Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(stringResource(R.string.common_enable), style = MaterialTheme.typography.labelSmall)
+                                if (isMalfunctioning) {
+                                    if (shizukuGranted) {
+                                        OutlinedButton(
+                                            onClick = onForceStopAndReset,
+                                            shape = RoundedCornerShape(8.dp),
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                        ) {
+                                            Text(
+                                                stringResource(R.string.accessibility_force_stop_shizuku),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        }
+                                        Spacer(Modifier.width(6.dp))
+                                    }
+                                    OutlinedButton(
+                                        onClick = onOpenAppInfo,
+                                        shape = RoundedCornerShape(8.dp),
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.accessibility_app_info),
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                    }
+                                    Spacer(Modifier.width(6.dp))
+                                } else if (shizukuGranted) {
+                                    OutlinedButton(
+                                        onClick = onEnableAccessibilityViaShizuku,
+                                        shape = RoundedCornerShape(8.dp),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.enable_via_shizuku),
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                }
+                                Button(
+                                    onClick = onOpenAccessibilitySettings,
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Text(
+                                        stringResource(
+                                            if (isMalfunctioning) R.string.open_accessibility_settings
+                                            else R.string.common_enable
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
                             }
                         }
                     }
@@ -282,7 +344,21 @@ fun GamesScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Spacer(Modifier.width(12.dp))
+                    Spacer(Modifier.width(8.dp))
+                    if (shizukuGranted) {
+                        IconButton(
+                            onClick = onRestartAccessibilityViaShizuku,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.auto_start_restart_shizuku),
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(4.dp))
                     Switch(
                         checked = settings.autoStartEnabled,
                         onCheckedChange = onToggleAutoStart,

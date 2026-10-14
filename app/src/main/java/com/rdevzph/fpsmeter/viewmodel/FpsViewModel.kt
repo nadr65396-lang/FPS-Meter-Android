@@ -6,6 +6,7 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -168,6 +169,14 @@ class FpsViewModel(
     val sessions: StateFlow<List<FpsSessionRecord>> = _sessions.asStateFlow()
 
     init {
+        FpsAccessibilityService.onServiceStateChanged = { running ->
+            if (running) {
+                _accessibilityEnabled.value = true
+                _accessibilityMalfunctioning.value = false
+            } else {
+                checkAccessibilityService(context)
+            }
+        }
         shizukuHelper.updateAvailability(packageManager)
         refreshSessions()
     }
@@ -236,6 +245,136 @@ class FpsViewModel(
     private val _accessibilityEnabled = MutableStateFlow(false)
     val accessibilityEnabled: StateFlow<Boolean> = _accessibilityEnabled.asStateFlow()
 
+    private val _accessibilityMalfunctioning = MutableStateFlow(false)
+    val accessibilityMalfunctioning: StateFlow<Boolean> = _accessibilityMalfunctioning.asStateFlow()
+
+    fun dismissAccessibilityMalfunction() {
+        _accessibilityMalfunctioning.value = false
+    }
+
+    fun forceStopAndResetViaShizuku(context: Context) {
+        val current = _settings.value
+        updateSettings(current.copy(autoStartEnabled = false))
+
+        if (!shizukuHelper.shizukuAvailable.value || !shizukuHelper.shizukuPermissionGranted.value) {
+            val intent = Intent(
+                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:${context.packageName}")
+            )
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+            return
+        }
+
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val svc = "${context.packageName}/${FpsAccessibilityService::class.java.name}"
+            val script = """
+                SVC="$svc"
+                CUR=${'$'}(settings get secure enabled_accessibility_services)
+                TMP=${'$'}(echo "${'$'}CUR" | tr ':' '\n' | grep -v "${'$'}SVC" | paste -sd:)
+                settings put secure enabled_accessibility_services "${'$'}TMP"
+                am force-stop ${context.packageName}
+            """.trimIndent()
+
+            try {
+                rikka.shizuku.Shizuku.newProcess(
+                    arrayOf("sh", "-c", script),
+                    null, null
+                )
+            } catch (e: Exception) {
+                val intent = Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:${context.packageName}")
+                )
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            }
+        }
+    }
+
+    fun enableAccessibilityViaShizuku(context: Context, onComplete: ((Boolean) -> Unit)? = null) =
+        restartAccessibilityViaShizuku(context, isEnabling = true, onComplete = onComplete)
+
+    fun restartAccessibilityViaShizuku(
+        context: Context,
+        isEnabling: Boolean = false,
+        onComplete: ((Boolean) -> Unit)? = null
+    ) {
+        if (!shizukuHelper.shizukuAvailable.value || !shizukuHelper.shizukuPermissionGranted.value) {
+            _statusMessage.value = context.getString(R.string.shizuku_not_ready)
+            onComplete?.invoke(false)
+            return
+        }
+
+        val isRestart = !isEnabling
+        _statusMessage.value = if (isRestart) {
+            context.getString(R.string.accessibility_restarting)
+        } else {
+            context.getString(R.string.accessibility_starting)
+        }
+
+        // 1. Immediately toggle auto-start setting off
+        val current = _settings.value
+        updateSettings(current.copy(autoStartEnabled = false))
+
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val svc = "${context.packageName}/${FpsAccessibilityService::class.java.name}"
+            val script = """
+                SVC="$svc"
+                CUR=${'$'}(settings get secure enabled_accessibility_services)
+                TMP=${'$'}(echo "${'$'}CUR" | tr ':' '\n' | grep -v "${'$'}SVC" | paste -sd:)
+                settings put secure enabled_accessibility_services "${'$'}TMP"
+                settings put secure accessibility_enabled 0
+                sleep 1
+                if [ -z "${'$'}TMP" ] || [ "${'$'}TMP" = "null" ]; then
+                    settings put secure enabled_accessibility_services "${'$'}SVC"
+                else
+                    settings put secure enabled_accessibility_services "${'$'}TMP:${'$'}SVC"
+                fi
+                settings put secure accessibility_enabled 1
+            """.trimIndent()
+
+            try {
+                val process = rikka.shizuku.Shizuku.newProcess(
+                    arrayOf("sh", "-c", script),
+                    null, null
+                )
+                val exitCode = process.waitFor()
+                kotlinx.coroutines.delay(800)
+                val alive = FpsAccessibilityService.isServiceRunning
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    val healthy = checkAccessibilityService(context)
+                    // 2. Toggle auto-start setting back on
+                    val latest = _settings.value
+                    updateSettings(latest.copy(autoStartEnabled = true))
+
+                    if (exitCode == 0 || healthy || alive) {
+                        _statusMessage.value = if (isRestart) {
+                            context.getString(R.string.accessibility_restart_success)
+                        } else {
+                            context.getString(R.string.accessibility_enable_success)
+                        }
+                        onComplete?.invoke(true)
+                    } else {
+                        _statusMessage.value = if (isRestart) {
+                            context.getString(R.string.accessibility_restart_failed)
+                        } else {
+                            context.getString(R.string.accessibility_enable_failed)
+                        }
+                        onComplete?.invoke(false)
+                    }
+                }
+            } catch (e: Exception) {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    val latest = _settings.value
+                    updateSettings(latest.copy(autoStartEnabled = true))
+                    _statusMessage.value = context.getString(R.string.shizuku_error, e.message)
+                    onComplete?.invoke(false)
+                }
+            }
+        }
+    }
+
     fun loadInstalledApps() {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             _isLoadingApps.value = true
@@ -276,35 +415,50 @@ class FpsViewModel(
     }
 
     fun checkAccessibilityService(context: Context): Boolean {
-        // 1. Direct static runtime check if service is running
-        if (FpsAccessibilityService.isServiceRunning) {
-            _accessibilityEnabled.value = true
-            return true
-        }
-
-        // 2. AccessibilityManager enabled services list
+        // 1. AccessibilityManager enabled services list from system server (only returns actively bound services)
         val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager
-        val isEnabledFromManager = am?.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+        val isBoundInSystem = am?.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
             ?.any { 
                 it.resolveInfo?.serviceInfo?.packageName == context.packageName &&
                 it.resolveInfo?.serviceInfo?.name?.contains("FpsAccessibilityService") == true
             } == true
-        if (isEnabledFromManager) {
+
+        // 2. Direct static runtime check if service instance is running in-process
+        // If the system server does not have our service bound, it cannot deliver any accessibility events.
+        // Reset any lingering in-process flag to prevent false positive healthy checks when service died.
+        if (!isBoundInSystem) {
+            FpsAccessibilityService.isServiceRunning = false
+        }
+
+        // Healthy ONLY if the system server actively has our service bound
+        if (isBoundInSystem) {
             _accessibilityEnabled.value = true
+            _accessibilityMalfunctioning.value = false
             return true
         }
 
-        // 3. Settings.Secure fallback
+        // 3. Check Settings.Secure to see if user had turned it on in system settings
         val enabledServices = Settings.Secure.getString(
             context.contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         ) ?: ""
-        val isEnabled = enabledServices.split(":").any {
-            val comp = ComponentName.unflattenFromString(it)
+        val isConfiguredInSettings = enabledServices.split(":").any {
+            val comp = ComponentName.unflattenFromString(it.trim())
             comp?.packageName == context.packageName && comp.className.contains("FpsAccessibilityService")
         }
-        _accessibilityEnabled.value = isEnabled
-        return isEnabled
+
+        // If it is configured in Settings.Secure, but neither AccessibilityManager nor runtime service is active,
+        // it has been stopped or crashed by the system ("Not working" state).
+        if (isConfiguredInSettings) {
+            _accessibilityEnabled.value = false
+            _accessibilityMalfunctioning.value = true
+            return false
+        }
+
+        // Neither running nor configured in settings
+        _accessibilityEnabled.value = false
+        _accessibilityMalfunctioning.value = false
+        return false
     }
 
     fun toggleAutoStartPackage(pkg: String) {
@@ -370,6 +524,7 @@ class FpsViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        FpsAccessibilityService.onServiceStateChanged = null
         shizukuHelper.onDestroy()
     }
 

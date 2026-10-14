@@ -170,6 +170,21 @@
     <!-- Games screen -->
     <string name="accessibility_required">需要无障碍服务</string>
     <string name="accessibility_required_desc">请在无障碍中启用 FPS Meter，以便检测前台游戏。</string>
+    <string name="accessibility_malfunctioning_title">无障碍服务已停止</string>
+    <string name="accessibility_malfunctioning_desc">无障碍服务已被系统终止。强行停止应用后重新打开并启用即可恢复正常。</string>
+    <string name="accessibility_malfunctioning_dialog_msg">Android 系统已停止 FPS Meter 无障碍服务。要解决此问题，我们需要在设置中重新启用无障碍服务。如果重新启用无障碍服务后自动启动悬浮窗仍无法工作，强行停止应用即可解决。\n\n解决步骤：\n1. 点击下方的“强行停止并重置”（或在应用信息中强行停止）。\n2. 重新打开 FPS Meter。\n3. 点击“通过 Shizuku”或“启用”即可正常开启。</string>
+    <string name="accessibility_force_stop_shizuku">强行停止并重置</string>
+    <string name="accessibility_app_info">应用信息</string>
+    <string name="accessibility_restart_shizuku">通过 Shizuku 重启</string>
+    <string name="accessibility_restarting">正在重启服务与自动启动...</string>
+    <string name="accessibility_starting">正在启动无障碍服务...</string>
+    <string name="accessibility_restart_success">无障碍服务与自动启动已成功重启</string>
+    <string name="accessibility_restart_failed">通过 Shizuku 重启服务失败</string>
+    <string name="accessibility_enable_success">无障碍服务已成功启用</string>
+    <string name="accessibility_enable_failed">通过 Shizuku 启动无障碍服务失败</string>
+    <string name="enable_via_shizuku">通过 Shizuku 启用</string>
+    <string name="auto_start_restart_shizuku">通过 Shizuku 重启自动启动</string>
+    <string name="open_accessibility_settings">打开设置</string>
     <string name="auto_start_target">在目标应用上自动启动</string>
     <string name="auto_start_target_desc">目标应用打开时自动启动悬浮窗，退出时停止。</string>
     <string name="auto_record_all">自动记录所有游戏</string>

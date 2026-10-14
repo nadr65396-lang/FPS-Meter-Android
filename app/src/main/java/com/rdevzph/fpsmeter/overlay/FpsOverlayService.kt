@@ -77,8 +77,25 @@ class FpsOverlayService : Service() {
         const val EXTRA_SHOW_RAM = "show_ram"
         const val EXTRA_SINGLE_LINE_OVERLAY = "single_line_overlay"
 
+        @Volatile
+        var instance: FpsOverlayService? = null
         var isRunning = false
         var isAutoStarted = false
+
+        fun stop(context: Context) {
+            isRunning = false
+            isAutoStarted = false
+            val currentInstance = instance
+            if (currentInstance != null) {
+                currentInstance.stopSelf()
+            } else {
+                try {
+                    context.stopService(Intent(context, FpsOverlayService::class.java))
+                } catch (e: Exception) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     private lateinit var windowManager: WindowManager
@@ -205,6 +222,7 @@ class FpsOverlayService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         isRunning = true
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val stickyBattery = registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
@@ -260,7 +278,7 @@ class FpsOverlayService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_STOP -> {
-                stopSelf()
+                stop(this)
                 return START_NOT_STICKY
             }
             ACTION_TOGGLE_VISIBILITY -> {
@@ -1004,6 +1022,9 @@ class FpsOverlayService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (instance === this) {
+            instance = null
+        }
         isRunning = false
         isAutoStarted = false
         serviceScope.cancel()

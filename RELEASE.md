@@ -1,14 +1,12 @@
-# FPS Meter Android v2.8
+# FPS Meter Android v2.9
 
-### What's New in v2.8
-- **Single-Line Overlay Mode**: Added a toggle in Overlay settings to display all performance, thermal, and RAM metrics on a single horizontal line, designed for tablets, wide screens, and landscape gaming.
-- **Telegram Community Link**: Added direct Telegram community link in the Settings screen.
-- **GPU Temperature Overlay Fix**: Verified and finalized the GPU temperature overlay fix for devices where the Android Thermal HAL reports combined Application Processor (AP) readings (such as the Samsung Galaxy Tab S9 Ultra, [#13](https://github.com/rdevz-ph/FPS-Meter-Android/issues/13)).
-- **Linux Sysfs Thermal Fallback**: Added fallback sensor detection and merging for Adreno, Mali, and Exynos GPU hardware when the Android Thermal HAL lacks separate GPU nodes.
-- **Third-Line RAM Overlay**: Added real-time available memory alongside occupied RAM percentage on a third overlay line, with an in-app toggle and responsive preview.
-- **Kernel Thermal Zones Dump**: Added an export tool in Device Diagnostics to dump raw Linux sysfs thermal zones and temperatures to a text file (.txt) with direct save, share, and copy options.
+### What's New in v2.9
+- **Auto-Start Overlay Reliability**: Resolved background overlay stopping issues during rapid app switching between configured games and apps.
+- **Accessibility Deadlock Recovery**: Added a force stop and reset guided flow to purge dead binders from Android system server when the accessibility service gets stuck in a disabled or crashed loop.
+- **Dedicated App Info Shortcut**: Added an App Info button on the warning banner and malfunction dialog for quick manual force stop access on non-Shizuku setups.
+- **Shizuku 1-Tap Enable and Restart**: Added dedicated one-tap enable and restart flows via Shizuku with distinct starting and restarting status indicators.
 
-For the complete release history, see [CHANGELOG.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/CHANGELOG.md).
+For the complete release history, see [CHANGELOG.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/CHANGELOG.md). For known Android system behaviors and limitations, see [KNOWN_ISSUES_AND_LIMITATIONS.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/KNOWN_ISSUES_AND_LIMITATIONS.md).
 
 ### Features
 - Choice between Choreographer and SurfaceFlinger FPS measurement providers
@@ -30,6 +28,9 @@ For the complete release history, see [CHANGELOG.md](https://github.com/rdevz-ph
 - Android 8.0+ (API 26)
 - Overlay Permission (SYSTEM_ALERT_WINDOW)
 - Shizuku (optional, required for SurfaceFlinger real game FPS and SoC temperature monitoring)
+
+### Known Issues & Limitations
+For details on Android background accessibility service handling, recovery steps, and non-root hardware limitations (GPU and RAM clock speeds), see [KNOWN_ISSUES_AND_LIMITATIONS.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/KNOWN_ISSUES_AND_LIMITATIONS.md).
 
 ### Installation & Setup Guides
 Download the APK from the assets below and enable the "Display over other apps" permission when prompted.

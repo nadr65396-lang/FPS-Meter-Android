@@ -170,6 +170,21 @@
     <!-- Games screen -->
     <string name="accessibility_required">Accessibility Service Required</string>
     <string name="accessibility_required_desc">Enable FPS Meter in Accessibility so it can detect foreground games.</string>
+    <string name="accessibility_malfunctioning_title">Accessibility Service Stopped</string>
+    <string name="accessibility_malfunctioning_desc">The accessibility service was stopped by Android. Force stop the app, then re-open and re-enable to fix it.</string>
+    <string name="accessibility_malfunctioning_dialog_msg">Android stopped the FPS Meter accessibility service. To fix this, we need to re-enable the accessibility service under settings. If auto-start overlay still does not work after re-enabling the accessibility service, force stopping the app can fix it.\n\nSteps:\n1. Tap \"Force Stop &amp; Reset\" below (or force stop in App Info).\n2. Re-open FPS Meter.\n3. Tap \"Via Shizuku\" or \"Enable\" to activate it cleanly.</string>
+    <string name="accessibility_force_stop_shizuku">Force Stop &amp; Reset</string>
+    <string name="accessibility_app_info">App Info</string>
+    <string name="accessibility_restart_shizuku">Restart via Shizuku</string>
+    <string name="accessibility_restarting">Restarting service and auto-start...</string>
+    <string name="accessibility_starting">Starting accessibility service...</string>
+    <string name="accessibility_restart_success">Accessibility service and auto-start restarted successfully</string>
+    <string name="accessibility_restart_failed">Failed to restart service via Shizuku</string>
+    <string name="accessibility_enable_success">Accessibility service enabled successfully</string>
+    <string name="accessibility_enable_failed">Failed to start accessibility service via Shizuku</string>
+    <string name="enable_via_shizuku">Via Shizuku</string>
+    <string name="auto_start_restart_shizuku">Restart Auto-Start via Shizuku</string>
+    <string name="open_accessibility_settings">Open Settings</string>
     <string name="auto_start_target">Auto-Start on Target Apps</string>
     <string name="auto_start_target_desc">Automatically start overlay when target apps open, and stop when exited.</string>
     <string name="auto_record_all">Auto-Record All Games</string>
