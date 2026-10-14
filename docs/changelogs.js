@@ -3,7 +3,7 @@ window.CHANGELOGS_TEXT = `## Version 2.9 | Latest Release | October 14, 2026
 - Auto-Start Overlay Reliability: Resolved background overlay stopping issues during rapid app switching between configured games and apps.
 - Accessibility Deadlock Recovery: Added a force stop and reset guided flow to purge dead binders from Android system server when the accessibility service gets stuck in a disabled or crashed loop.
 - Dedicated App Info Shortcut: Added an App Info button on the warning banner and malfunction dialog for quick manual force stop access on non-Shizuku setups.
-- Shizuku 1-Tap Enable and Restart: Added dedicated one-tap enable and restart flows via Shizuku with distinct starting and restarting status indicators.
+- One-Tap Shizuku Actions: Turn on or restart the accessibility service with one tap using Shizuku.
 
 ## Version 2.8 | October 12, 2026
 - Single-Line Overlay Mode: Added a toggle in Overlay settings to display all performance, thermal, and RAM metrics on a single horizontal line, optimized for tablets, wide screens, and landscape gaming.
