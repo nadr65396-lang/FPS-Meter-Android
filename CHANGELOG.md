@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - **Accessibility Deadlock Recovery**: Added a force stop and reset guided flow to purge dead binders from Android system server when the accessibility service gets stuck in a disabled or crashed loop.
 - **Dedicated App Info Shortcut**: Added an App Info button on the warning banner and malfunction dialog for quick manual force stop access on non-Shizuku setups.
-- **Shizuku 1-Tap Enable and Restart**: Added dedicated one-tap enable and restart flows via Shizuku with distinct starting and restarting status indicators.
+- **One-Tap Shizuku Actions**: Turn on or restart the accessibility service with one tap using Shizuku.
 
 ### Fixed
 - **Auto-Start Overlay Reliability**: Resolved background overlay stopping issues during rapid app switching between configured games and apps.
