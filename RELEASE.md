@@ -31,9 +31,6 @@ For the complete release history, see [CHANGELOG.md](https://github.com/rdevz-ph
 - Overlay Permission (SYSTEM_ALERT_WINDOW)
 - Shizuku (optional, required for SurfaceFlinger real game FPS and SoC temperature monitoring)
 
-### Known Issues & Limitations
-For details on Android background accessibility service handling, recovery steps, and non-root hardware limitations (GPU and RAM clock speeds), see [KNOWN_ISSUES_AND_LIMITATIONS.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/KNOWN_ISSUES_AND_LIMITATIONS.md).
-
 ### Installation & Setup Guides
 Download the APK from the assets below and enable the "Display over other apps" permission when prompted.
 
