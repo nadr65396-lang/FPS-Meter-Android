@@ -50,6 +50,29 @@ FPS Meter includes a guided recovery dialog when this state is detected:
 
 ---
 
+## OEM Game Sidebars and Assistant Overlays
+
+### The Issue
+
+Many device manufacturers include built-in gaming assistants and sidebars that launch automatically when a game starts. Examples include Transsion Smart Panel (Tecno and Infinix), Xiaomi Game Turbo (MIUI and HyperOS), Samsung Game Booster, and Oppo/Realme Game Space.
+
+Because these assistants display floating handles or overlay panels over the game screen, the Android accessibility service can mistake them for a separate app opening. When this happens, the accessibility service assumes you left the game and automatically hides the FPS overlay.
+
+### What Was Done
+
+FPS Meter includes built-in filters to ignore popular OEM gaming assistants and sidebars. It also checks active application windows so that non-application overlays and Google Play sign-in banners do not stop the overlay while your game is running in the background.
+
+### If Your Game Assistant Still Closes the Overlay
+
+Because Android device manufacturers frequently update or introduce new gaming assistant packages, some specific OEM overlay packages may not be in the default ignore list yet.
+
+If the auto-start overlay stops unexpectedly when opening a game or using a gaming sidebar:
+1. Identify the package name of your device's gaming assistant (using an app inspector or via ADB).
+2. Open an issue on GitHub with your device model, Android version, and the package name.
+3. The package name will be added to the ignored list in the next update.
+
+---
+
 ## Hardware Frequency Limitations (GPU & RAM Clock Speeds)
 
 ### Android system restrictions (Non-root limitations)
