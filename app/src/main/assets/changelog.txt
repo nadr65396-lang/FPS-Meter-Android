@@ -1,3 +1,9 @@
+## Version 2.9-hotfix
+- Fixed an issue where the overlay would briefly show and then auto-hide when returning to a game from the home screen or recent apps.
+- Fixed an issue where OEM game sidebars like Transsion Smart Panel, Xiaomi Game Turbo, and Samsung Game Booster caused the overlay to stop.
+- Fixed an issue where Google Play Games sign-in popups and account banners caused the overlay to auto-hide.
+- Note: These issues only affect the auto-start overlay feature via Accessibility Service. If you do not use auto-start, you can safely skip this update.
+
 ## Version 2.9
 - Fixed auto-start overlay stopping reliability when switching between target apps.
 - Added force stop and reset recovery flow to resolve Android accessibility service deadlocks.

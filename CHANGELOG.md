@@ -4,6 +4,18 @@ All notable changes to the FPS Meter project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v2.9-hotfix] - 2026-10-15
+
+### Fixed
+- **Overlay Auto-Hide on App Resume**: Fixed an issue where the overlay briefly appeared and then stopped when returning to a target app or game from the home screen or recent apps screen.
+- **OEM Game Sidebar Compatibility**: Prevented built-in game assistants and sidebars (such as Transsion Smart Panel, Xiaomi Game Turbo, Samsung Game Booster, and Oppo Game Space) from causing the overlay to auto-hide.
+- **Google Play Games Popups**: Prevented Google Play Games sign-in notifications and account banners from stopping the overlay while playing a game.
+
+> [!NOTE]
+> These issues only affect the auto-start overlay feature via Accessibility Service. If you do not use auto-start, you can safely skip this update.
+
+---
+
 ## [v2.9] - 2026-10-14
 
 ### Added
@@ -273,6 +285,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+[v2.9-hotfix]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.9-hotfix
 [v2.9]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.9
 [v2.8]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.8
 [v2.8-beta]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.8-beta

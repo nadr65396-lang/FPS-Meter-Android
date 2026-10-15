@@ -1,10 +1,12 @@
-# FPS Meter Android v2.9
+# FPS Meter Android v2.9-hotfix
 
-### What's New in v2.9
-- **Auto-Start Overlay Reliability**: Resolved background overlay stopping issues during rapid app switching between configured games and apps.
-- **Accessibility Deadlock Recovery**: Added a force stop and reset guided flow to purge dead binders from Android system server when the accessibility service gets stuck in a disabled or crashed loop.
-- **Dedicated App Info Shortcut**: Added an App Info button on the warning banner and malfunction dialog for quick manual force stop access on non-Shizuku setups.
-- **One-Tap Shizuku Actions**: Turn on or restart the accessibility service with one tap using Shizuku.
+### What's New in v2.9-hotfix
+- **Overlay Auto-Hide on App Resume**: Fixed an issue where the overlay briefly appeared and then stopped when returning to a target app or game from the home screen or recent apps screen.
+- **OEM Game Sidebar Compatibility**: Prevented built-in game assistants and sidebars (such as Transsion Smart Panel, Xiaomi Game Turbo, Samsung Game Booster, and Oppo Game Space) from causing the overlay to auto-hide.
+- **Google Play Games Popups**: Prevented Google Play Games sign-in notifications and account banners from stopping the overlay while playing a game.
+
+> [!NOTE]
+> These issues only affect the auto-start overlay feature via Accessibility Service. If you do not use auto-start, you can safely skip this update.
 
 For the complete release history, see [CHANGELOG.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/CHANGELOG.md). For known Android system behaviors and limitations, see [KNOWN_ISSUES_AND_LIMITATIONS.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/KNOWN_ISSUES_AND_LIMITATIONS.md).
 

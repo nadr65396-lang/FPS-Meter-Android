@@ -1,5 +1,11 @@
 // External changelogs data source (preserves index.html cleanliness and file:// offline support)
-window.CHANGELOGS_TEXT = `## Version 2.9 | Latest Release | October 14, 2026
+window.CHANGELOGS_TEXT = `## Version 2.9-hotfix | Latest Release | October 15, 2026
+- Overlay Auto-Hide on App Resume: Fixed an issue where the overlay briefly appeared and then stopped when returning to a target app or game from the home screen or recent apps screen.
+- OEM Game Sidebar Compatibility: Prevented built-in game assistants and sidebars (such as Transsion Smart Panel, Xiaomi Game Turbo, Samsung Game Booster, and Oppo Game Space) from causing the overlay to auto-hide.
+- Google Play Games Popups: Prevented Google Play Games sign-in notifications and account banners from stopping the overlay while playing a game.
+- Note: These issues only affect the auto-start overlay feature via Accessibility Service. If you do not use auto-start, you can safely skip this update.
+
+## Version 2.9 | October 14, 2026
 - Auto-Start Overlay Reliability: Resolved background overlay stopping issues during rapid app switching between configured games and apps.
 - Accessibility Deadlock Recovery: Added a force stop and reset guided flow to purge dead binders from Android system server when the accessibility service gets stuck in a disabled or crashed loop.
 - Dedicated App Info Shortcut: Added an App Info button on the warning banner and malfunction dialog for quick manual force stop access on non-Shizuku setups.
