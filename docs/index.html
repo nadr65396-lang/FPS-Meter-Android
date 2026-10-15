@@ -729,7 +729,12 @@
         const date = parts[2] || '';
         const isLatest = idx === 0;
 
-        const items = lines.slice(1).filter(l => l.startsWith('- ')).map(l => {
+        const items = lines.slice(1).map(l => {
+          if (l.startsWith('### ') || l.startsWith('#### ')) {
+            const sectionTitle = l.replace(/^#+\s*/, '');
+            return `<li class="changelog-category">${sectionTitle}</li>`;
+          }
+          if (!l.startsWith('- ')) return '';
           const content = l.replace(/^- \s*/, '');
           const colonIdx = content.indexOf(':');
           if (colonIdx !== -1) {

@@ -1,4 +1,5 @@
 ## Version 2.9-hotfix | Latest Release | October 15, 2026
+### Fixed
 - Overlay Auto-Hide on App Resume: Fixed an issue where the overlay briefly appeared and then stopped when returning to a target app or game from the home screen or recent apps screen.
 - OEM Game Sidebar Compatibility: Prevented built-in game assistants and sidebars (such as Transsion Smart Panel, Xiaomi Game Turbo, Samsung Game Booster, and Oppo Game Space) from causing the overlay to auto-hide.
 - Google Play Games Popups: Prevented Google Play Games sign-in notifications and account banners from stopping the overlay while playing a game.

@@ -1,6 +1,8 @@
 # FPS Meter Android v2.9-hotfix
 
 ### What's New in v2.9-hotfix
+
+#### Fixed
 - **Overlay Auto-Hide on App Resume**: Fixed an issue where the overlay briefly appeared and then stopped when returning to a target app or game from the home screen or recent apps screen.
 - **OEM Game Sidebar Compatibility**: Prevented built-in game assistants and sidebars (such as Transsion Smart Panel, Xiaomi Game Turbo, Samsung Game Booster, and Oppo Game Space) from causing the overlay to auto-hide.
 - **Google Play Games Popups**: Prevented Google Play Games sign-in notifications and account banners from stopping the overlay while playing a game.
