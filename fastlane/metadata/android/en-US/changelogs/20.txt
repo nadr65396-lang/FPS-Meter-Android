@@ -1,4 +1,3 @@
-- Fixed auto-start overlay stopping reliability when switching between target apps.
 - Added force stop and reset recovery flow to resolve Android accessibility service deadlocks.
 - Added shortcut to App Info for manual force stop on non-Shizuku devices.
 - Added one-tap accessibility service enabling and restarting via Shizuku.

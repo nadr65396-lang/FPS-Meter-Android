@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **One-Tap Shizuku Actions**: Turn on or restart the accessibility service with one tap using Shizuku.
 
 ### Fixed
-- **Auto-Start Overlay Reliability**: Resolved background overlay stopping issues during rapid app switching between configured games and apps.
+- ~~**Auto-Start Overlay Reliability**: Resolved background overlay stopping issues during rapid app switching between configured games and apps.~~
 
 ---
 
