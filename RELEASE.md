@@ -16,9 +16,9 @@
 
 ### Feature Highlights
 
-| Overlay Style Setting | Afterburner Overlay |
+| Overlay Style Setting | MSI Afterburner Style (RTSS) Overlay |
 | :---: | :---: |
-| ![Overlay Style Setting](https://raw.githubusercontent.com/rdevz-ph/FPS-Meter-Android/main/screenshots/overlay-styles.png) | ![Afterburner Overlay](https://raw.githubusercontent.com/rdevz-ph/FPS-Meter-Android/main/screenshots/msi-afterburner-style.png) |
+| ![Overlay Style Setting](https://raw.githubusercontent.com/rdevz-ph/FPS-Meter-Android/main/screenshots/overlay-styles.png) | ![MSI Afterburner Style (RTSS) Overlay](https://raw.githubusercontent.com/rdevz-ph/FPS-Meter-Android/main/screenshots/msi-afterburner-style.png) |
 
 For the complete release history, see [CHANGELOG.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/CHANGELOG.md). For known Android system behaviors and limitations, see [KNOWN_ISSUES_AND_LIMITATIONS.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/KNOWN_ISSUES_AND_LIMITATIONS.md).
 

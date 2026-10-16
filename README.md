@@ -16,7 +16,7 @@
   [![Privacy Policy](https://img.shields.io/badge/Privacy-Offline%20First-00e5ff?style=for-the-badge)](https://rdevz-ph.github.io/FPS-Meter-Android/privacy.html)
 
   <p align="center">
-    A high-performance, lightweight FPS monitoring tool for Android. This application provides real-time frame rate overlays inspired by Samsung Perf Z and Afterburner telemetry, offering a clean monitoring experience for mobile gaming and performance testing.
+    A high-performance, lightweight FPS monitoring tool for Android. This application provides real-time frame rate overlays inspired by Samsung Perf Z and MSI Afterburner Style (RTSS) telemetry, offering a clean monitoring experience for mobile gaming and performance testing.
     <br><br>
     <strong>Official Website & Showcase:</strong> <a href="https://rdevz-ph.github.io/FPS-Meter-Android/">https://rdevz-ph.github.io/FPS-Meter-Android/</a>
   </p>
@@ -75,9 +75,9 @@ Visit the [Official Website & Showcase](https://rdevz-ph.github.io/FPS-Meter-And
 | ![Auto-Record All Games](./screenshots/enable-all.jpg) | ![Confirmation Notice Dialog](./screenshots/fps-record-warning.jpg) |
 
 ### Overlay Styles
-| Overlay Style Setting | Afterburner Telemetry Overlay |
-|:---------------------:|:---------------------------------:|
-| ![Overlay Style Setting](./screenshots/overlay-styles.png) | ![Afterburner Telemetry Overlay](./screenshots/msi-afterburner-style.png) |
+| Overlay Style Setting | MSI Afterburner Style (RTSS) Telemetry Overlay |
+|:---------------------:|:----------------------------------------------:|
+| ![Overlay Style Setting](./screenshots/overlay-styles.png) | ![MSI Afterburner Style (RTSS) Telemetry Overlay](./screenshots/msi-afterburner-style.png) |
 
 ### In-Game Performance Testing
 | OpenGL ES `[GL]` | Vulkan `[VK]` |
