@@ -1,3 +1,10 @@
+## Version 3.0
+- Added MSI Afterburner Style (RTSS) overlay with multi-column hardware telemetry.
+- Added color-coded hardware rows for GPU, CPU with MHz frequency, dedicated SoC temperature, Battery, RAM, and FPS.
+- Added processor and SoC model header anchored at the top of the Afterburner overlay.
+- Added dynamic system font integration so the overlay follows the user's active device font.
+- Added Overlay Style selector in Overlay settings.
+
 ## Version 2.9-hotfix
 - Fixed an issue where the overlay would briefly show and then auto-hide when returning to a game from the home screen or recent apps.
 - Fixed an issue where OEM game sidebars like Transsion Smart Panel, Xiaomi Game Turbo, and Samsung Game Booster caused the overlay to stop.

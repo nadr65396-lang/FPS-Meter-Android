@@ -8,7 +8,7 @@
   [![API](https://img.shields.io/badge/API-26%2B-10b981?style=for-the-badge)](https://android.com)
   [![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
   [![License](https://img.shields.io/badge/license-MIT-4f46e5?style=for-the-badge)](./LICENSE)
-  [![Version](https://img.shields.io/badge/version-2.9-f59e0b?style=for-the-badge)](https://github.com/rdevz-ph/FPS-Meter-Android/releases/latest)
+  [![Version](https://img.shields.io/badge/version-3.0-f59e0b?style=for-the-badge)](https://github.com/rdevz-ph/FPS-Meter-Android/releases/latest)
   [![Downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fmy-release-badge-api.netlify.app%2Fapi%2Fbadge%3Fowner%3Drdevz-ph%26repo%3DFPS-Meter-Android%26mode%3Djson&query=%24.downloads&label=downloads&color=2563eb&style=for-the-badge)](https://github.com/rdevz-ph/FPS-Meter-Android/releases)
   [![Telegram](https://img.shields.io/badge/Telegram-@fpsmeterandroid-24A1DE?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/fpsmeterandroid)
   [![F-Droid](https://img.shields.io/f-droid/v/com.rdevzph.fpsmeter?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/en/packages/com.rdevzph.fpsmeter/)
@@ -16,7 +16,7 @@
   [![Privacy Policy](https://img.shields.io/badge/Privacy-Offline%20First-00e5ff?style=for-the-badge)](https://rdevz-ph.github.io/FPS-Meter-Android/privacy.html)
 
   <p align="center">
-    A high-performance, lightweight FPS monitoring tool for Android. This application provides a real-time frame rate overlay inspired by the Samsung Perf Z aesthetic, offering a professional monitoring experience for mobile gaming and performance testing.
+    A high-performance, lightweight FPS monitoring tool for Android. This application provides real-time frame rate overlays inspired by Samsung Perf Z and Afterburner telemetry, offering a clean monitoring experience for mobile gaming and performance testing.
     <br><br>
     <strong>Official Website & Showcase:</strong> <a href="https://rdevz-ph.github.io/FPS-Meter-Android/">https://rdevz-ph.github.io/FPS-Meter-Android/</a>
   </p>
@@ -34,6 +34,7 @@
 > - **Hardware & Battery Telemetry**:
 >   - **Battery Temperature & Charge Level (`BAT`)**: Uses a dynamic `BroadcastReceiver` for `Intent.ACTION_BATTERY_CHANGED` to monitor real-time battery temperature and remaining charge percentage (`BAT xx%`) for fullscreen gaming. When both are enabled, they automatically merge into a unified indicator: `BAT <temp> (<level>)` (e.g. `BAT 38°C (85%)`).
 >   - **SoC, CPU & GPU Temps (`SOC`, `CPU`, `GPU`)**: Queries Android's Thermal HAL (`dumpsys thermalservice`) and Linux sysfs thermal zones (`cpu-*-usr`, `gpuss-*-usr`) via Shizuku privileged shell access to monitor accurate live silicon hotspot, individual CPU core, and GPU temperatures during gaming across Qualcomm Snapdragon and MediaTek platforms.
+> - **Customizable Overlay Styles**: Switch between the default compact pill and the multi-row MSI Afterburner Style (RTSS) telemetry layout featuring real-time processor model, clock frequencies, and color-coded hardware sensors.
 > - **Adaptive Dynamic Layout**: Automatically presents a clean single-line pill when 1 to 3 metrics are enabled, and organizes into a structured two-line layout (Line 1: Performance metrics, Line 2: Temperatures) when 4 or more metrics are active.
 > - **Material 3 Navigation & Dedicated Screens**: Modern navigation featuring Overlay settings, Games manager with 1-tap game launching, and dedicated FPS session History with per-app launcher icons.
 > - **Universal Auto-Record & Per-Game Recording**: Choose between universal automated session recording for all active games or per-app configuration, aggregating average, min, and max FPS and duration with zero sample-by-sample disk overhead.
@@ -72,6 +73,11 @@ Visit the [Official Website & Showcase](https://rdevz-ph.github.io/FPS-Meter-And
 | Auto-Record All Games Toggle | Confirmation Notice Dialog |
 |:----------------------------:|:--------------------------:|
 | ![Auto-Record All Games](./screenshots/enable-all.jpg) | ![Confirmation Notice Dialog](./screenshots/fps-record-warning.jpg) |
+
+### Overlay Styles
+| Overlay Style Setting | Afterburner Telemetry Overlay |
+|:---------------------:|:---------------------------------:|
+| ![Overlay Style Setting](./screenshots/overlay-styles.png) | ![Afterburner Telemetry Overlay](./screenshots/msi-afterburner-style.png) |
 
 ### In-Game Performance Testing
 | OpenGL ES `[GL]` | Vulkan `[VK]` |

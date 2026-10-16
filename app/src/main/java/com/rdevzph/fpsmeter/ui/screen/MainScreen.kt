@@ -49,7 +49,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rdevzph.fpsmeter.model.FpsProvider
+import com.rdevzph.fpsmeter.model.OverlayStyle
 import com.rdevzph.fpsmeter.overlay.FpsOverlayService
+import com.rdevzph.fpsmeter.util.DeviceHardwareHelper
 import com.rdevzph.fpsmeter.viewmodel.FpsViewModel
 import com.rdevzph.fpsmeter.viewmodel.OverlaySettings
 
@@ -206,6 +208,7 @@ fun MainScreen(
                 putExtra(FpsOverlayService.EXTRA_SHOW_BATTERY_LEVEL, settings.showBatteryLevel)
                 putExtra(FpsOverlayService.EXTRA_SHOW_RAM, settings.showRam)
                 putExtra(FpsOverlayService.EXTRA_SINGLE_LINE_OVERLAY, settings.singleLineOverlay)
+                putExtra(FpsOverlayService.EXTRA_OVERLAY_STYLE, settings.overlayStyle.name)
             }
             context.startForegroundService(intent)
             viewModel.setOverlayRunning(true)
@@ -389,6 +392,7 @@ fun MainScreen(
                             putExtra(FpsOverlayService.EXTRA_SHOW_BATTERY_LEVEL, settings.showBatteryLevel)
                             putExtra(FpsOverlayService.EXTRA_SHOW_RAM, settings.showRam)
                             putExtra(FpsOverlayService.EXTRA_SINGLE_LINE_OVERLAY, settings.singleLineOverlay)
+                            putExtra(FpsOverlayService.EXTRA_OVERLAY_STYLE, settings.overlayStyle.name)
                         }
                         context.startForegroundService(intent)
                         viewModel.setOverlayRunning(true)
@@ -419,6 +423,7 @@ fun MainScreen(
                                 putExtra(FpsOverlayService.EXTRA_SHOW_BATTERY_LEVEL, newSettings.showBatteryLevel)
                                 putExtra(FpsOverlayService.EXTRA_SHOW_RAM, newSettings.showRam)
                                 putExtra(FpsOverlayService.EXTRA_SINGLE_LINE_OVERLAY, newSettings.singleLineOverlay)
+                                putExtra(FpsOverlayService.EXTRA_OVERLAY_STYLE, newSettings.overlayStyle.name)
                             }
                             context.startForegroundService(intent)
                         }
@@ -1649,9 +1654,10 @@ fun OverlaySettingsPanel(
                     .padding(end = 8.dp)
             ) {
                 Text(stringResource(R.string.remaining_ram), style = MaterialTheme.typography.labelMedium)
+                Spacer(Modifier.height(2.dp))
                 Text(
                     stringResource(R.string.remaining_ram_desc),
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -1662,7 +1668,7 @@ fun OverlaySettingsPanel(
             )
         }
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(10.dp))
 
         // Single-line overlay toggle
         Row(
@@ -1675,9 +1681,10 @@ fun OverlaySettingsPanel(
                     .padding(end = 8.dp)
             ) {
                 Text(stringResource(R.string.single_line_overlay), style = MaterialTheme.typography.labelMedium)
+                Spacer(Modifier.height(2.dp))
                 Text(
                     stringResource(R.string.single_line_overlay_desc),
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -1686,6 +1693,51 @@ fun OverlaySettingsPanel(
                 onCheckedChange = { onChange(settings.copy(singleLineOverlay = it)) },
                 modifier = Modifier.scale(0.8f)
             )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Overlay Style selection
+        Text(stringResource(R.string.overlay_style), style = MaterialTheme.typography.labelMedium)
+        Spacer(Modifier.height(2.dp))
+        Text(
+            stringResource(R.string.overlay_style_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OverlayStyle.entries.forEach { style ->
+                val isSelected = settings.overlayStyle == style
+                val label = when (style) {
+                    OverlayStyle.DEFAULT -> stringResource(R.string.overlay_style_default)
+                    OverlayStyle.MSI_AFTERBURNER -> stringResource(R.string.overlay_style_afterburner)
+                }
+                OutlinedButton(
+                    onClick = { onChange(settings.copy(overlayStyle = style)) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (isSelected)
+                            MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                    )
+                ) {
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
 
         Spacer(Modifier.height(12.dp))
@@ -1757,103 +1809,211 @@ fun OverlaySettingsPanel(
                 (if (hasBattBoth) 1 else ((if (hasBatt) 1 else 0) + (if (hasBattLevel) 1 else 0)))
 
         val hasThermals = hasCpu || hasGpu || hasSoc || hasBatt || hasBattLevel
-        // Wrap thermals to next line if more than 3 extra overlays are enabled (> 3) OR if RAM overlay is also enabled and thermals are present
-        // If singleLineOverlay is enabled, keep all metrics on a single horizontal line.
         val useNextLine = !settings.singleLineOverlay && ((extraOverlayCount > 3 && hasThermals) || (hasRam && hasThermals))
         val isMultiLine = !settings.singleLineOverlay && (useNextLine || hasRam)
+        val isAfterburner = settings.overlayStyle == OverlayStyle.MSI_AFTERBURNER
+        val previewIsMultiLine = if (isAfterburner) !settings.singleLineOverlay else isMultiLine
 
         // FPS preview chip
         Surface(
-            color = Color.DarkGray.copy(alpha = 0.8f),
-            shape = RoundedCornerShape(if (isMultiLine) 12.dp else 100.dp)
+            color = if (isAfterburner) Color(0xFF141720).copy(alpha = settings.backgroundAlpha) else Color.DarkGray.copy(alpha = 0.8f),
+            shape = RoundedCornerShape(if (isAfterburner) 12.dp else if (previewIsMultiLine) 12.dp else 100.dp)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = if (isMultiLine) 8.dp else 6.dp),
+                modifier = Modifier.padding(
+                    horizontal = if (isAfterburner) 14.dp else 16.dp,
+                    vertical = if (isAfterburner) (if (settings.singleLineOverlay) 6.dp else 10.dp) else if (previewIsMultiLine) 8.dp else 6.dp
+                ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.Visibility, null, modifier = Modifier.size(14.dp), tint = Color(0xAAFFFFFF))
                 Spacer(Modifier.width(8.dp))
                 Text(
                     buildAnnotatedString {
-                        val labelColor = Color(0xFF00E5FF)
-                        val valueColor = Color.White
                         val fpsValueColor = if (settings.color == OverlaySettings.AUTO_COLOR) Color(0xFF4CAF50) else Color(settings.color)
 
-                        // === Line 1: Performance Group (FPS, Graphics API, Frame Time) ===
-                        withStyle(SpanStyle(color = labelColor, fontWeight = FontWeight.Bold)) {
-                            append("FPS ")
-                        }
-                        withStyle(SpanStyle(color = fpsValueColor, fontWeight = FontWeight.Bold)) {
-                            append("60")
-                        }
+                        if (isAfterburner) {
+                            val socModel = DeviceHardwareHelper.getSocModel()
+                            val colorGpu = Color(0xFF00E676)
+                            val colorCpu = Color(0xFF00B0FF)
+                            val colorSocTag = Color(0xFF00E5FF)
+                            val colorBat = Color(0xFFFFA000)
+                            val colorRam = Color(0xFFBA68C8)
+                            val colorFps = Color(0xFFFF8A80)
+                            val colorVal = Color(0xFFFF7A00)
+                            val colorNa = Color(0xFF808080)
+                            val colorSoc = Color(0xFFB0BEC5)
+                            val colorApi = Color(0xFFFF5722) // Distinct orange for Vulkan
 
-                        if (hasApi) {
-                            withStyle(SpanStyle(color = Color.Gray)) { append("  |  ") }
-                            withStyle(SpanStyle(color = Color(0xFFFF5722), fontWeight = FontWeight.Bold)) {
-                                append("VK")
-                            }
-                        }
-
-                        if (hasMs) {
-                            withStyle(SpanStyle(color = Color.Gray)) { append("  |  ") }
-                            withStyle(SpanStyle(color = labelColor, fontWeight = FontWeight.Bold)) {
-                                append("MS ")
-                            }
-                            withStyle(SpanStyle(color = valueColor, fontWeight = FontWeight.Bold)) {
-                                append("16")
-                            }
-                        }
-
-                        // === Hardware / Thermals Group (CPU, GPU, SoC, Battery) ===
-                        if (hasThermals) {
-                            if (useNextLine) {
-                                append("\n")
-                            }
-                            var isFirstThermalOnLine = useNextLine
-                            fun appendThermal(tag: String, value: String) {
-                                if (!isFirstThermalOnLine) {
-                                    withStyle(SpanStyle(color = Color.Gray)) { append("  |  ") }
+                            fun appendPreviewRow(tag: String, tagColor: Color, cells: List<Pair<String, Color>>) {
+                                withStyle(SpanStyle(color = tagColor, fontWeight = FontWeight.Bold)) {
+                                    append(tag)
                                 }
+                                val spaceAfterTag = if (settings.singleLineOverlay) "\u00A0" else "    "
+                                append(spaceAfterTag)
+                                val spaceBetweenCells = if (settings.singleLineOverlay) " " else "    "
+                                cells.forEachIndexed { index, (value, vColor) ->
+                                    if (index > 0) {
+                                        append(spaceBetweenCells)
+                                    }
+                                    withStyle(SpanStyle(color = vColor, fontWeight = FontWeight.Bold)) {
+                                        append(value)
+                                    }
+                                }
+                            }
+
+                            var isFirstLine = true
+                            fun newPreviewLine() {
+                                if (!isFirstLine) {
+                                    if (settings.singleLineOverlay) {
+                                        withStyle(SpanStyle(color = Color.Gray)) { append("\u00A0 | ") }
+                                    } else {
+                                        append("\n")
+                                    }
+                                }
+                                isFirstLine = false
+                            }
+
+                            // 1. SoC header on top
+                            if (socModel.isNotEmpty()) {
+                                newPreviewLine()
+                                withStyle(SpanStyle(color = colorSoc, fontWeight = FontWeight.Bold)) {
+                                    append(socModel)
+                                }
+                            }
+
+                            // 2. GPU row (only if GPU temp enabled)
+                            if (hasGpu) {
+                                newPreviewLine()
+                                val gpuTempStr = if (settings.singleLineOverlay) "38.5°C" else "38.5 °C"
+                                appendPreviewRow("GPU", colorGpu, listOf(gpuTempStr to colorVal))
+                            }
+
+                            // 3. CPU row (only if CPU temp enabled)
+                            if (hasCpu) {
+                                newPreviewLine()
+                                val cpuTempStr = if (settings.singleLineOverlay) "42.1°C" else "42.1 °C"
+                                val freqStr = if (settings.singleLineOverlay) "1800MHz" else "1800 MHz"
+                                appendPreviewRow("CPU", colorCpu, listOf(
+                                    cpuTempStr to colorVal,
+                                    freqStr to colorVal
+                                ))
+                            }
+
+                            // 4. SoC row (only if SoC temp enabled)
+                            if (hasSoc) {
+                                newPreviewLine()
+                                val socTempStr = if (settings.singleLineOverlay) "45.2°C" else "45.2 °C"
+                                appendPreviewRow("SOC", colorSocTag, listOf(socTempStr to colorVal))
+                            }
+
+                            // 5. BAT row (only if battery temp or level enabled)
+                            if (hasBatt || hasBattLevel) {
+                                newPreviewLine()
+                                val batCells = mutableListOf<Pair<String, Color>>()
+                                if (hasBatt) batCells.add((if (settings.singleLineOverlay) "34.9°C" else "34.9 °C") to colorVal)
+                                if (hasBattLevel) batCells.add((if (settings.singleLineOverlay) "85%" else "85 %") to colorVal)
+                                appendPreviewRow("BAT", colorBat, batCells)
+                            }
+
+                            // 6. RAM row (only if RAM overlay enabled)
+                            if (hasRam) {
+                                newPreviewLine()
+                                val ramGbStr = if (settings.singleLineOverlay) "4.2GB" else "4.2 GB"
+                                val ramPctStr = if (settings.singleLineOverlay) "58%" else "58 %"
+                                appendPreviewRow("RAM", colorRam, listOf(ramGbStr to colorVal, ramPctStr to colorVal))
+                            }
+
+                            // 7. FPS row (always shown)
+                            newPreviewLine()
+                            val fpsCells = mutableListOf("60 FPS" to colorVal)
+                            if (hasApi) {
+                                fpsCells.add("VK" to colorApi)
+                            }
+                            if (hasMs) {
+                                fpsCells.add((if (settings.singleLineOverlay) "16.6ms" else "16.6 ms") to colorVal)
+                            }
+                            appendPreviewRow("FPS", colorFps, fpsCells)
+                        } else {
+                            val labelColor = Color(0xFF00E5FF)
+                            val valueColor = Color.White
+
+                            // === Line 1: Performance Group (FPS, Graphics API, Frame Time) ===
+                            withStyle(SpanStyle(color = labelColor, fontWeight = FontWeight.Bold)) {
+                                append("FPS ")
+                            }
+                            withStyle(SpanStyle(color = fpsValueColor, fontWeight = FontWeight.Bold)) {
+                                append("60")
+                            }
+
+                            if (hasApi) {
+                                withStyle(SpanStyle(color = Color.Gray)) { append("  |  ") }
+                                withStyle(SpanStyle(color = Color(0xFFFF5722), fontWeight = FontWeight.Bold)) {
+                                    append("VK")
+                                }
+                            }
+
+                            if (hasMs) {
+                                withStyle(SpanStyle(color = Color.Gray)) { append("  |  ") }
                                 withStyle(SpanStyle(color = labelColor, fontWeight = FontWeight.Bold)) {
-                                    append("$tag ")
+                                    append("MS ")
                                 }
                                 withStyle(SpanStyle(color = valueColor, fontWeight = FontWeight.Bold)) {
-                                    append(value)
+                                    append("16")
                                 }
-                                isFirstThermalOnLine = false
                             }
 
-                            if (hasCpu) appendThermal("CPU", "42.1°C")
-                            if (hasGpu) appendThermal("GPU", "38.5°C")
-                            if (hasSoc) appendThermal("SOC", "45.2°C")
-                            if (hasBattBoth) {
-                                appendThermal("BAT", "38.5°C (85%)")
-                            } else if (hasBatt) {
-                                appendThermal("BATT", "38.5°C")
-                            } else if (hasBattLevel) {
-                                appendThermal("BAT", "85%")
-                            }
-                        }
+                            // === Hardware / Thermals Group (CPU, GPU, SoC, Battery) ===
+                            if (hasThermals) {
+                                if (useNextLine) {
+                                    append("\n")
+                                }
+                                var isFirstThermalOnLine = useNextLine
+                                fun appendThermal(tag: String, value: String) {
+                                    if (!isFirstThermalOnLine) {
+                                        withStyle(SpanStyle(color = Color.Gray)) { append("  |  ") }
+                                    }
+                                    withStyle(SpanStyle(color = labelColor, fontWeight = FontWeight.Bold)) {
+                                        append("$tag ")
+                                    }
+                                    withStyle(SpanStyle(color = valueColor, fontWeight = FontWeight.Bold)) {
+                                        append(value)
+                                    }
+                                    isFirstThermalOnLine = false
+                                }
 
-                        // === Memory Group (RAM) ===
-                        if (hasRam) {
-                            if (settings.singleLineOverlay) {
-                                withStyle(SpanStyle(color = Color.Gray)) { append("  |  ") }
-                            } else {
-                                append("\n")
+                                if (hasCpu) appendThermal("CPU", "42.1°C")
+                                if (hasGpu) appendThermal("GPU", "38.5°C")
+                                if (hasSoc) appendThermal("SOC", "45.2°C")
+                                if (hasBattBoth) {
+                                    appendThermal("BAT", "38.5°C (85%)")
+                                } else if (hasBatt) {
+                                    appendThermal("BATT", "38.5°C")
+                                } else if (hasBattLevel) {
+                                    appendThermal("BAT", "85%")
+                                }
                             }
-                            withStyle(SpanStyle(color = labelColor, fontWeight = FontWeight.Bold)) {
-                                append("RAM ")
-                            }
-                            withStyle(SpanStyle(color = valueColor, fontWeight = FontWeight.Bold)) {
-                                append("4.2 GB (58%)")
+
+                            // === Memory Group (RAM) ===
+                            if (hasRam) {
+                                if (settings.singleLineOverlay) {
+                                    withStyle(SpanStyle(color = Color.Gray)) { append("  |  ") }
+                                } else {
+                                    append("\n")
+                                }
+                                withStyle(SpanStyle(color = labelColor, fontWeight = FontWeight.Bold)) {
+                                    append("RAM ")
+                                }
+                                withStyle(SpanStyle(color = valueColor, fontWeight = FontWeight.Bold)) {
+                                    append("4.2 GB (58%)")
+                                }
                             }
                         }
                     },
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontFamily = FontFamily.SansSerif,
+                        fontFamily = FontFamily.Default,
                         fontSize = settings.textSizeSp.sp * 0.65f,
-                        textAlign = TextAlign.Center
+                        textAlign = if (isAfterburner && !settings.singleLineOverlay) TextAlign.Start else TextAlign.Center
                     )
                 )
             }

@@ -828,6 +828,29 @@ html[data-theme="light"] .btn-badge {
   flex: 0 0 460px;
 }
 
+.screenshot-card.preview-card {
+  flex: 0 0 340px;
+}
+
+.screenshot-card.preview-card .screenshot-img-wrap {
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--md-sys-color-surface-container-lowest);
+  padding: 1.5rem;
+}
+
+.screenshot-card.preview-card .screenshot-img {
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--md-sys-shape-corner-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .screenshot-card:hover {
   transform: translateY(-4px);
   border-color: var(--md-sys-color-primary);

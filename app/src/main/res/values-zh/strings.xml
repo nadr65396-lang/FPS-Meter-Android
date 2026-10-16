@@ -78,6 +78,10 @@
     <string name="remaining_ram_desc">在悬浮窗第三行显示可用内存及已占用百分比</string>
     <string name="single_line_overlay">单行显示悬浮窗</string>
     <string name="single_line_overlay_desc">在单行内横向显示所有指标，适合平板或横屏使用</string>
+    <string name="overlay_style">悬浮窗样式</string>
+    <string name="overlay_style_desc">在默认紧凑悬浮窗与 MSI Afterburner 风格 (RTSS) 硬件遥测布局之间切换</string>
+    <string name="overlay_style_default">默认</string>
+    <string name="overlay_style_afterburner">RTSS</string>
     <string name="position_presets">位置预设</string>
     <string name="pos_top_left">左上</string>
     <string name="pos_top_center">顶部居中</string>

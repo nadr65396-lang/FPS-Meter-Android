@@ -33,7 +33,9 @@ import com.rdevzph.fpsmeter.R
 import com.rdevzph.fpsmeter.accessibility.FpsAccessibilityService
 import com.rdevzph.fpsmeter.model.FpsProvider
 import com.rdevzph.fpsmeter.model.GraphicsApi
+import com.rdevzph.fpsmeter.model.OverlayStyle
 import com.rdevzph.fpsmeter.recording.FpsRecordingManager
+import com.rdevzph.fpsmeter.util.DeviceHardwareHelper
 import com.rdevzph.fpsmeter.util.LocaleHelper
 import com.rdevzph.fpsmeter.viewmodel.OverlaySettings
 import kotlinx.coroutines.*
@@ -76,6 +78,7 @@ class FpsOverlayService : Service() {
         const val EXTRA_SHOW_BATTERY_LEVEL = "show_battery_level"
         const val EXTRA_SHOW_RAM = "show_ram"
         const val EXTRA_SINGLE_LINE_OVERLAY = "single_line_overlay"
+        const val EXTRA_OVERLAY_STYLE = "overlay_style"
 
         @Volatile
         var instance: FpsOverlayService? = null
@@ -142,6 +145,7 @@ class FpsOverlayService : Service() {
     private var showBatteryLevel = false
     private var showRam = false
     private var singleLineOverlay = false
+    private var overlayStyle = OverlayStyle.DEFAULT
 
     private var availableRamGb: Float = 0f
     private var usedRamPercent: Int = 0
@@ -263,6 +267,7 @@ class FpsOverlayService : Service() {
         showBatteryLevel = saved.showBatteryLevel
         showRam = saved.showRam
         singleLineOverlay = saved.singleLineOverlay
+        overlayStyle = saved.overlayStyle
 
         if (showRam) {
             val (ramGb, ramPercent) = sampleRamUsage()
@@ -503,14 +508,35 @@ class FpsOverlayService : Service() {
                 }
             }
         }
+        if (intent.hasExtra(EXTRA_OVERLAY_STYLE)) {
+            val styleStr = intent.getStringExtra(EXTRA_OVERLAY_STYLE)
+            val newStyle = OverlayStyle.fromString(styleStr)
+            if (newStyle != overlayStyle) {
+                overlayStyle = newStyle
+                if (::overlayView.isInitialized) {
+                    updateOverlayAppearance()
+                }
+            }
+        }
     }
 
     private fun createOverlayBackgroundDrawable(isMultiLine: Boolean): GradientDrawable {
         val bgAlphaInt = (backgroundAlpha.coerceIn(0f, 1f) * 255).toInt()
         return GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
-            cornerRadius = if (isMultiLine) 32f else 1000f
-            setColor(Color.argb(bgAlphaInt, 17, 17, 17))
+            cornerRadius = if (overlayStyle == OverlayStyle.MSI_AFTERBURNER) {
+                16f
+            } else if (isMultiLine) {
+                32f
+            } else {
+                1000f
+            }
+            val bgColor = if (overlayStyle == OverlayStyle.MSI_AFTERBURNER) {
+                Color.argb(bgAlphaInt, 20, 24, 32)
+            } else {
+                Color.argb(bgAlphaInt, 17, 17, 17)
+            }
+            setColor(bgColor)
         }
     }
 
@@ -518,7 +544,21 @@ class FpsOverlayService : Service() {
         if (::overlayView.isInitialized) {
             overlayView.post {
                 overlayView.textSize = textSizeSp
-                overlayView.background = createOverlayBackgroundDrawable(lastUseNextLine == true)
+                overlayView.typeface = Typeface.DEFAULT_BOLD
+                overlayView.gravity = if (overlayStyle == OverlayStyle.MSI_AFTERBURNER && !singleLineOverlay) Gravity.START else Gravity.CENTER
+                val isMulti = if (overlayStyle == OverlayStyle.MSI_AFTERBURNER) !singleLineOverlay else (lastUseNextLine == true)
+                overlayView.background = createOverlayBackgroundDrawable(isMulti)
+                if (overlayStyle == OverlayStyle.MSI_AFTERBURNER) {
+                    if (singleLineOverlay) {
+                        overlayView.setPadding(24, 8, 24, 8)
+                    } else {
+                        overlayView.setPadding(24, 14, 24, 14)
+                    }
+                } else if (isMulti) {
+                    overlayView.setPadding(28, 12, 28, 12)
+                } else {
+                    overlayView.setPadding(24, 8, 24, 8)
+                }
                 overlayView.alpha = 1.0f
                 val shadowAlpha = (255 * overlayAlpha.coerceIn(0.1f, 1.0f)).roundToInt()
                 overlayView.setShadowLayer(2f, 0f, 0f, Color.argb(shadowAlpha, 0, 0, 0))
@@ -549,14 +589,23 @@ class FpsOverlayService : Service() {
             y = posY
         }
 
+        val isMulti = if (overlayStyle == OverlayStyle.MSI_AFTERBURNER) !singleLineOverlay else false
         overlayView = TextView(this).apply {
-            background = createOverlayBackgroundDrawable(false)
+            background = createOverlayBackgroundDrawable(isMulti)
             textSize = textSizeSp
-            typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
+            typeface = Typeface.DEFAULT_BOLD
             alpha = 1.0f
-            gravity = Gravity.CENTER
-            setLineSpacing(6f, 1f)
-            setPadding(24, 8, 24, 8)
+            gravity = if (overlayStyle == OverlayStyle.MSI_AFTERBURNER && !singleLineOverlay) Gravity.START else Gravity.CENTER
+            setLineSpacing(4f, 1f)
+            if (overlayStyle == OverlayStyle.MSI_AFTERBURNER) {
+                if (singleLineOverlay) {
+                    setPadding(24, 8, 24, 8)
+                } else {
+                    setPadding(24, 14, 24, 14)
+                }
+            } else {
+                setPadding(24, 8, 24, 8)
+            }
             val shadowAlpha = (255 * overlayAlpha.coerceIn(0.1f, 1.0f)).roundToInt()
             setShadowLayer(2f, 0f, 0f, Color.argb(shadowAlpha, 0, 0, 0))
             setOnTouchListener(DragTouchListener())
@@ -608,6 +657,159 @@ class FpsOverlayService : Service() {
         val isMultiLine = !singleLineOverlay && (useNextLine || hasRam)
 
         val ssb = SpannableStringBuilder()
+
+        if (overlayStyle == OverlayStyle.MSI_AFTERBURNER) {
+            val socModel = DeviceHardwareHelper.getSocModel()
+            val cpuFreq = DeviceHardwareHelper.getCpuFrequencyMhz()
+
+            val colorGpu = Color.parseColor("#00E676")   // Bright Green
+            val colorCpu = Color.parseColor("#00B0FF")   // Sky Blue
+            val colorSocTag = Color.parseColor("#00E5FF") // Electric Cyan
+            val colorBat = Color.parseColor("#FFA000")   // Amber Gold
+            val colorRam = Color.parseColor("#BA68C8")   // Orchid / Violet
+            val colorFps = Color.parseColor("#FF8A80")   // Salmon Coral
+            val colorVal = Color.parseColor("#FF7A00")   // Bright Orange for active values
+            val colorNa = Color.parseColor("#808080")    // Medium Gray for N/A
+            val colorSoc = Color.parseColor("#B0BEC5")   // Soft Silver for SoC header
+            val colorApi = if (detectedGraphicsApi == GraphicsApi.VULKAN) {
+                Color.parseColor("#FF5722") // Distinct orange for Vulkan
+            } else {
+                Color.parseColor("#2196F3") // Blue for OpenGL ES
+            }
+
+            fun appendRow(tag: String, tagColor: Int, cells: List<Pair<String, Int>>) {
+                ssb.append(tag, tagColor, StyleSpan(Typeface.BOLD))
+                val spaceAfterTag = if (singleLineOverlay) "\u00A0" else "    "
+                ssb.append(spaceAfterTag)
+                val spaceBetweenCells = if (singleLineOverlay) " " else "    "
+                cells.forEachIndexed { index, (value, vColor) ->
+                    if (index > 0) {
+                        ssb.append(spaceBetweenCells)
+                    }
+                    ssb.append(value, vColor, StyleSpan(Typeface.BOLD))
+                }
+            }
+
+            var isFirstLine = true
+            fun newLine() {
+                if (!isFirstLine) {
+                    if (singleLineOverlay) {
+                        ssb.append("\u00A0 | ", Color.GRAY)
+                    } else {
+                        ssb.append("\n")
+                    }
+                }
+                isFirstLine = false
+            }
+
+            // 1. SoC header on top
+            if (socModel.isNotEmpty()) {
+                newLine()
+                ssb.append(socModel, colorSoc, StyleSpan(Typeface.BOLD))
+            }
+
+            // 2. GPU row (only if GPU temp enabled)
+            if (hasGpu) {
+                newLine()
+                val gpuTempStr = if (gpuTemp > 0f) {
+                    if (singleLineOverlay) String.format(Locale.US, "%.1f°C", gpuTemp) else String.format(Locale.US, "%.1f °C", gpuTemp)
+                } else {
+                    if (singleLineOverlay) "--°C" else "-- °C"
+                }
+                appendRow("GPU", colorGpu, listOf(gpuTempStr to colorVal))
+            }
+
+            // 3. CPU row (only if CPU temp enabled)
+            if (hasCpu) {
+                newLine()
+                val cpuTempStr = if (cpuTemp > 0f) {
+                    if (singleLineOverlay) String.format(Locale.US, "%.1f°C", cpuTemp) else String.format(Locale.US, "%.1f °C", cpuTemp)
+                } else {
+                    if (singleLineOverlay) "--°C" else "-- °C"
+                }
+                val cpuCells = mutableListOf(cpuTempStr to colorVal)
+                if (cpuFreq > 0) {
+                    val freqStr = if (singleLineOverlay) "${cpuFreq}MHz" else "$cpuFreq MHz"
+                    cpuCells.add(freqStr to colorVal)
+                }
+                appendRow("CPU", colorCpu, cpuCells)
+            }
+
+            // 4. SoC Temp row (only if SoC temp enabled)
+            if (hasSoc) {
+                newLine()
+                val socTempStr = if (socTemp > 0f) {
+                    if (singleLineOverlay) String.format(Locale.US, "%.1f°C", socTemp) else String.format(Locale.US, "%.1f °C", socTemp)
+                } else {
+                    if (singleLineOverlay) "--°C" else "-- °C"
+                }
+                appendRow("SOC", colorSocTag, listOf(socTempStr to colorVal))
+            }
+
+            // 5. BAT row (only if battery temp or level enabled)
+            if (hasBatt || hasBattLevel) {
+                newLine()
+                val batCells = mutableListOf<Pair<String, Int>>()
+                if (hasBatt) {
+                    val batTempStr = if (batteryTemp > 0f) {
+                        if (singleLineOverlay) String.format(Locale.US, "%.1f°C", batteryTemp) else String.format(Locale.US, "%.1f °C", batteryTemp)
+                    } else {
+                        if (singleLineOverlay) "--°C" else "-- °C"
+                    }
+                    batCells.add(batTempStr to colorVal)
+                }
+                if (hasBattLevel && batteryLevel >= 0) {
+                    val batLevelStr = if (singleLineOverlay) "$batteryLevel%" else "$batteryLevel %"
+                    batCells.add(batLevelStr to colorVal)
+                }
+                appendRow("BAT", colorBat, batCells)
+            }
+
+            // 6. RAM row (only if RAM overlay enabled)
+            if (hasRam) {
+                newLine()
+                val ramGbStr = if (availableRamGb > 0f) {
+                    if (singleLineOverlay) String.format(Locale.US, "%.1fGB", availableRamGb) else String.format(Locale.US, "%.1f GB", availableRamGb)
+                } else {
+                    if (singleLineOverlay) "--GB" else "-- GB"
+                }
+                val ramCells = mutableListOf(ramGbStr to colorVal)
+                if (usedRamPercent > 0) {
+                    val ramPctStr = if (singleLineOverlay) "$usedRamPercent%" else "$usedRamPercent %"
+                    ramCells.add(ramPctStr to colorVal)
+                }
+                appendRow("RAM", colorRam, ramCells)
+            }
+
+            // 7. FPS row (always shown)
+            newLine()
+            val fpsStr = "$fps FPS"
+            val fpsColor = if (textColor == OverlaySettings.AUTO_COLOR) colorVal else fpsValueColor
+            val fpsCells = mutableListOf(fpsStr to fpsColor)
+            if (hasApi && detectedGraphicsApi != GraphicsApi.UNKNOWN) {
+                fpsCells.add(detectedGraphicsApi.shortLabel to colorApi)
+            }
+            if (hasMs && fps > 0) {
+                val msStr = if (singleLineOverlay) "${(1000f / fps).roundToInt()}ms" else "${(1000f / fps).roundToInt()} ms"
+                fpsCells.add(msStr to colorVal)
+            }
+            appendRow("FPS", colorFps, fpsCells)
+
+            val isMulti = !singleLineOverlay
+            overlayView.post {
+                if (lastUseNextLine != isMulti) {
+                    lastUseNextLine = isMulti
+                    overlayView.background = createOverlayBackgroundDrawable(isMulti)
+                    if (isMulti) {
+                        overlayView.setPadding(24, 14, 24, 14)
+                    } else {
+                        overlayView.setPadding(24, 8, 24, 8)
+                    }
+                }
+                overlayView.text = ssb
+            }
+            return
+        }
 
         // === Performance Group (FPS, Graphics API, Frame Time) ===
         ssb.append("FPS ", labelColor, StyleSpan(Typeface.BOLD))

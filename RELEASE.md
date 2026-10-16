@@ -1,20 +1,31 @@
-# FPS Meter Android v2.9-hotfix
+# FPS Meter Android v3.0
 
-### What's New in v2.9-hotfix
+### What's New in v3.0
 
-#### Fixed
-- **Overlay Auto-Hide on App Resume**: Fixed an issue where the overlay briefly appeared and then stopped when returning to a target app or game from the home screen or recent apps screen.
-- **OEM Game Sidebar Compatibility**: Prevented built-in game assistants and sidebars (such as Transsion Smart Panel, Xiaomi Game Turbo, Samsung Game Booster, and Oppo Game Space) from causing the overlay to auto-hide.
-- **Google Play Games Popups**: Prevented Google Play Games sign-in notifications and account banners from stopping the overlay while playing a game.
+#### Added
+- **MSI Afterburner Style (RTSS) Overlay**: Added a new hardware overlay layout inspired by MSI Afterburner (RTSS), accessible via the Overlay Style setting.
+- **Hardware Telemetry Rows**: Added multi-row telemetry with distinct color tags for each hardware component:
+  - Header: Detected processor or SoC model (such as MT6897).
+  - GPU (Green): Real-time GPU temperature.
+  - CPU (Sky Blue): CPU temperature and active clock frequency in MHz.
+  - SOC (Electric Cyan): Dedicated system-on-chip temperature.
+  - BAT (Amber Gold): Battery temperature and charge percentage.
+  - RAM (Violet): Real-time available RAM in gigabytes and occupied percentage.
+  - FPS (Salmon Coral): Frame rate, frame time in milliseconds, and detected graphics API.
+- **System Font Integration**: The overlay text now follows your device's active system font in bold weight instead of forcing a fixed font family.
 
-> [!NOTE]
-> These issues only affect the auto-start overlay feature via Accessibility Service. If you do not use auto-start, you can safely skip this update.
+### Feature Highlights
+
+| Overlay Style Setting | Afterburner Overlay |
+| :---: | :---: |
+| ![Overlay Style Setting](https://raw.githubusercontent.com/rdevz-ph/FPS-Meter-Android/main/screenshots/overlay-styles.png) | ![Afterburner Overlay](https://raw.githubusercontent.com/rdevz-ph/FPS-Meter-Android/main/screenshots/msi-afterburner-style.png) |
 
 For the complete release history, see [CHANGELOG.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/CHANGELOG.md). For known Android system behaviors and limitations, see [KNOWN_ISSUES_AND_LIMITATIONS.md](https://github.com/rdevz-ph/FPS-Meter-Android/blob/main/KNOWN_ISSUES_AND_LIMITATIONS.md).
 
 ### Features
 - Choice between Choreographer and SurfaceFlinger FPS measurement providers
 - Automatic Graphics API detection (Vulkan and OpenGL ES)
+- Two overlay styles: default compact pill and multi-row MSI Afterburner Style (RTSS) telemetry layout
 - Samsung-style pill-shaped overlay with cyan labels and white values
 - Real-time FPS, frame time (MS), RAM usage, and multi-metric temperature monitoring (CPU, GPU, SoC, and Battery)
 - Adaptive layout dynamically scaling across lines, with a single-line mode option for tablets and landscape gaming

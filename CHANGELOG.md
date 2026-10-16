@@ -4,6 +4,22 @@ All notable changes to the FPS Meter project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [v3.0] - 2026-10-16
+
+### Added
+- **MSI Afterburner Style (RTSS) Overlay**: Added a new hardware overlay layout inspired by MSI Afterburner (RTSS), accessible via the Overlay Style setting.
+- **Hardware Telemetry Rows**: Added multi-row telemetry with distinct color tags for each hardware component:
+  - Header: Detected processor or SoC model (such as MT6897).
+  - GPU (Green): Real-time GPU temperature.
+  - CPU (Sky Blue): CPU temperature and active clock frequency in MHz.
+  - SOC (Electric Cyan): Dedicated system-on-chip temperature.
+  - BAT (Amber Gold): Battery temperature and charge percentage.
+  - RAM (Violet): Real-time available RAM in gigabytes and occupied percentage.
+  - FPS (Salmon Coral): Frame rate, frame time in milliseconds, and detected graphics API.
+- **System Font Integration**: The overlay text now follows your device's active system font in bold weight instead of forcing a fixed font family.
+
+---
+
 ## [v2.9-hotfix] - 2026-10-15
 
 ### Fixed
@@ -285,6 +301,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+[v3.0]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v3.0
 [v2.9-hotfix]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.9-hotfix
 [v2.9]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.9
 [v2.8]: https://github.com/rdevz-ph/FPS-Meter-Android/releases/tag/v2.8

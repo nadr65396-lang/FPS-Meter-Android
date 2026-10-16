@@ -78,6 +78,10 @@
     <string name="remaining_ram_desc">Display available memory and occupied RAM percentage on a third overlay line</string>
     <string name="single_line_overlay">Single-line overlay</string>
     <string name="single_line_overlay_desc">Display all metrics on one horizontal line for tablets or landscape view</string>
+    <string name="overlay_style">Overlay Style</string>
+    <string name="overlay_style_desc">Choose between the default compact pill and the MSI Afterburner Style (RTSS) layout</string>
+    <string name="overlay_style_default">Default</string>
+    <string name="overlay_style_afterburner">RTSS</string>
     <string name="position_presets">Position Presets</string>
     <string name="pos_top_left">Top Left</string>
     <string name="pos_top_center">Top Center</string>
