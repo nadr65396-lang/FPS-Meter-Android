@@ -8,14 +8,14 @@
 
   <!-- SEO & Social Meta -->
   <meta name="description"
-    content="Privacy Policy for FPS Meter Android. 100% offline, zero data collection, zero analytics, and zero tracking.">
+    content="Privacy Policy for FPS Meter Android. 100% offline, zero personal data collection, zero analytics, and zero tracking.">
   <meta name="keywords"
     content="FPS Meter, Android, Privacy Policy, Offline, Open Source, Shizuku">
   <meta name="author" content="Romel (rdevz-ph)">
 
   <meta property="og:title" content="Privacy Policy - FPS Meter for Android">
   <meta property="og:description"
-    content="Privacy Policy for FPS Meter Android. 100% offline, zero data collection, zero analytics, and zero tracking.">
+    content="Privacy Policy for FPS Meter Android. 100% offline, zero personal data collection, zero analytics, and zero tracking.">
   <meta property="og:image" content="assets/icon.png">
   <meta property="og:type" content="website">
 
@@ -470,7 +470,7 @@
             <svg class="policy-meta-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
               <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
             </svg>
-            <span class="policy-meta-text">Effective Date: October 5, 2026</span>
+            <span class="policy-meta-text">Last Updated: October 17, 2026</span>
           </div>
           <div class="policy-meta-item">
             <svg class="policy-meta-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
@@ -534,40 +534,44 @@
         </p>
       </section>
 
-      <!-- Section 2: Zero Data Collection -->
+      <!-- Section 2: Information We Do Not Collect -->
       <section class="policy-section">
         <h2>
           <span class="material-symbols-outlined">visibility_off</span>
           Information We Do Not Collect
         </h2>
         <p>
-          FPS Meter Android does not gather any information about you or your device. Specifically:
+          FPS Meter Android does not collect personal information, user accounts, or persistent tracking identifiers. Specifically:
         </p>
         <ul>
           <li><strong>No Personal Identifiers:</strong> We do not collect names, email addresses, phone numbers, contacts, or account credentials. There is no account registration or login required.</li>
-          <li><strong>No Device Identifiers:</strong> We do not collect advertising IDs, IMEI numbers, MAC addresses, or Android hardware IDs.</li>
-          <li><strong>No Analytics or Tracking:</strong> The app contains no third-party analytics SDKs, trackers, or telemetry endpoints.</li>
-          <li><strong>No Crash Reporting Services:</strong> No automatic crash dumps or device logs are sent to external servers.</li>
-          <li><strong>No Internet Communication:</strong> The app does not transmit any performance metrics or usage patterns over the internet.</li>
+          <li><strong>No Tracking Identifiers:</strong> We do not collect advertising IDs, IMEI numbers, MAC addresses, or persistent hardware identifiers used for user tracking.</li>
+          <li><strong>No Analytics or Tracking:</strong> The app contains no third-party analytics SDKs, advertising trackers, or behavioral profiling tools.</li>
+          <li><strong>No Automatic Crash Reporting Services:</strong> No crash dumps or device logs are sent automatically to external servers.</li>
+          <li><strong>No Internet Communication:</strong> The app does not transmit any performance metrics, gameplay data, or usage patterns over the internet.</li>
         </ul>
+        <p>
+          <strong>Device Information for Diagnostics:</strong> The application does read basic hardware details locally, including your device model, processor, display refresh rate, Android version, and thermal sensor readings. This information is gathered solely on your device to show system diagnostics and help troubleshoot hardware compatibility issues. It stays on your device and is never automatically sent anywhere. It is only shared if you explicitly choose to copy or export a diagnostic report.
+        </p>
       </section>
 
-      <!-- Section 3: Telemetry Processing -->
+      <!-- Section 3: Telemetry and Diagnostic Processing -->
       <section class="policy-section">
         <h2>
           <span class="material-symbols-outlined">speed</span>
-          How Performance Data Is Handled
+          How Performance and Diagnostic Data Is Handled
         </h2>
         <p>
-          All metrics calculated by FPS Meter Android are generated locally in real time:
+          All metrics and diagnostic data in FPS Meter Android are generated locally in real time:
         </p>
         <ul>
           <li><strong>Frames Per Second (FPS) and Frame Times:</strong> Measured using local frame callbacks (Android Choreographer API) or compositor buffer queries (SurfaceFlinger via Shizuku).</li>
           <li><strong>Battery Information:</strong> Read directly from Android's standard local battery change broadcasts to show current battery temperature and battery level.</li>
           <li><strong>Hardware Temperatures:</strong> Read locally from device thermal sensors and Linux thermal zones via Shizuku shell commands.</li>
+          <li><strong>Device Diagnostics:</strong> Hardware specifications (such as device model, processor, display capabilities, and Android build details) are read locally to populate the Device Diagnostics screen and assist in troubleshooting.</li>
         </ul>
         <p>
-          These readings exist only in active device memory to render the on-screen overlay and are never transmitted outside your device.
+          These readings exist only in active device memory to render the on-screen overlay and diagnostic screen. They are never transmitted outside your device unless you manually choose to copy or export a diagnostic report.
         </p>
       </section>
 
