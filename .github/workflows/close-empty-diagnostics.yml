@@ -1,0 +1,30 @@
+name: Auto Close Empty Diagnostics
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Specific issue number to check (leave blank to scan all open diagnostic issues)'
+        required: false
+        default: ''
+
+permissions:
+  issues: write
+
+jobs:
+  check-diagnostics:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, '[Device Diagnostics]')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run diagnostic issue checker
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          INPUT_ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: python3 .github/scripts/check_diagnostic_issue.py
