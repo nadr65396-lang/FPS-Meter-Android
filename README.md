@@ -17,8 +17,6 @@
 
   <p align="center">
     A high-performance, lightweight FPS monitoring tool for Android. This application provides real-time frame rate overlays inspired by Samsung Perf Z and MSI Afterburner Style (RTSS) telemetry, offering a clean monitoring experience for mobile gaming and performance testing.
-    <br><br>
-    <strong>Official Website & Showcase:</strong> <a href="https://rdevz-ph.github.io/FPS-Meter-Android/">https://rdevz-ph.github.io/FPS-Meter-Android/</a>
   </p>
 
 </div>
@@ -97,7 +95,6 @@ For details on known Android system behaviors and non-root hardware limitations,
 ## Developer
 Built by **Romel** ([@rdevz-ph](https://github.com/rdevz-ph))
 - Portfolio: [https://romel-portfolio.vercel.app/](https://romel-portfolio.vercel.app/)
-- GitHub: [https://github.com/rdevz-ph](https://github.com/rdevz-ph)
 
 ## Privacy Policy
 FPS Meter Android operates completely offline. It does not collect, monitor, or transmit any personal data. You can read the full policy at [Privacy Policy](https://rdevz-ph.github.io/FPS-Meter-Android/privacy.html).
