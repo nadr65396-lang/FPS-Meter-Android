@@ -24,6 +24,9 @@ To help investigate the issue, please include your device diagnostics:
 2. Go to **Settings > Device Diagnostics**.
 3. Tap **Report on GitHub** or **Copy All**, then paste the results into your GitHub issue.
 
+> [!WARNING]
+> Please always include a description of the problem you are experiencing. Issues submitted with only a device diagnostic report and no problem context will be automatically closed by our bot so we can prioritize active issues. If your issue was closed by mistake, you can add your problem details and re-open it.
+
 #### Dump Thermal Zones Text File (Version 2.8+)
 
 If you are reporting issues with CPU, GPU, or battery temperature readings:
