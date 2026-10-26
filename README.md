@@ -21,6 +21,9 @@
 
 </div>
 
+> [!TIP]
+> **Advertisement:** Enjoying using my app? I have a new interesting app for you to try and it is also open source: [RedirectGuard](https://github.com/rdevz-ph/RedirectGuard).
+
 ## How It Works and Its Features
 
 > [!NOTE]
