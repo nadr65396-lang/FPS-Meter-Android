@@ -1,4 +1,4 @@
-# Known Issues and Limitations
+jig# Known Issues and Limitations
 
 This document outlines known Android system behaviors, hardware restrictions, and recommended troubleshooting steps when using FPS Meter.
 
